@@ -1,0 +1,6 @@
+@SIA.Client.API_HostAddress = http://localhost:5119
+
+GET {{SIA.Client.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
