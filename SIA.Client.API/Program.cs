@@ -2,6 +2,7 @@ using Authentication.JWTAuthenticationManager;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using SIA.Client.API.Middlewares;
 using SIA.Infrastructure.Data;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
@@ -20,6 +21,7 @@ var jwtParameters = new JwtTokenParameter()
 };
 
 // Add services to the container.
+builder.Services.AddScoped<IBaseRepository, BaseRepository>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
@@ -66,10 +68,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
-else
-{
-   
-}
 
 // Configure the HTTP request pipeline.
 
@@ -78,7 +76,10 @@ app.UseStaticFiles();
 app.UseAuthentication();
 
 app.UseAuthorization();
-//app.UseGlobalExceptionMiddleware();
+
+app.UseCors();
+
+app.UseExceptionMiddleware();
 
 app.UseHsts();
 

@@ -5,7 +5,7 @@ using SIA.Infrastructure.Interfaces;
 
 namespace SIA.Infrastructure.Repositories
 {
-    public class UserRepository(AppDBContext dbContext) : IUserRepository
+    public class UserRepository(AppDBContext dbContext) : IBaseRepository, IUserRepository
     {
         public async Task<User> UserAuthenticationAsync(string userId, string password)
         {
