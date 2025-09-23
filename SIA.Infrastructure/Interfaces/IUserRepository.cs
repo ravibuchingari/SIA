@@ -1,11 +1,9 @@
-﻿using SIA.Domain.Entities;
+﻿using SIA.Infrastructure.DTO;
 
 namespace SIA.Infrastructure.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User> GetUserByIdAsync(int id);
-        Task<IEnumerable<User>> GetAllUsersAsync();
-
+        Task<User> UserAuthenticationAsync(string userId, string password);
     }
 }

@@ -14,6 +14,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "sia": {
+      "commandName": "IIS",
+      "launchBrowser": true,
+      "launchUrl": "api/home/start",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",
@@ -23,6 +32,10 @@
     "iisExpress": {
       "applicationUrl": "http://localhost:55418/",
       "sslPort": 44388
+    },
+    "iis": {
+      "applicationUrl": "http://localhost/sia",
+      "sslPort": 0
     }
   }
 }
