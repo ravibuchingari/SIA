@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SIA.Client.API.Middlewares;
+using SIA.Client.API.Models;
 using SIA.Infrastructure.Data;
+using SIA.Infrastructure.DTO;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
 using System.Text.Json;
@@ -61,8 +63,15 @@ builder.Services.AddHttpsRedirection(options =>
     options.HttpsPort = 44388;
 });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+});
+
 
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
