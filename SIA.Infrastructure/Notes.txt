@@ -1,0 +1,1 @@
+﻿scaffold-dbcontext "Data Source=RAVI-ACER\SQLEXPRESS;Initial Catalog=SIA;User Id=sa;password=india123;TrustServerCertificate=True" Microsoft.EntityFrameworkCore.SqlServer -outputdir DTO -ContextDir Data -Context AppDBContext -dataannotations -Force

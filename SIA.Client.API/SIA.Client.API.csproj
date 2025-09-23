@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SIA.Authentication\SIA.Authentication.csproj" />
+    <ProjectReference Include="..\SIA.Domain\SIA.Domain.csproj" />
     <ProjectReference Include="..\SIA.Infrastructure\SIA.Infrastructure.csproj" />
   </ItemGroup>
 

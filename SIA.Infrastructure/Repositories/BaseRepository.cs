@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SIA.Infrastructure.Repositories
 {
-    public class BaseRepository(AppDBContext dbContext): IBaseRepository
+    public class BaseRepository(AppDBContext? dbContext)
     {
         private static void ThrowError(DbUpdateException ex)
         {

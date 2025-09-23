@@ -1,14 +1,15 @@
 using Authentication.JWTAuthenticationManager;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SIA.Client.API.Middlewares;
 using SIA.Client.API.Models;
 using SIA.Infrastructure.Data;
-using SIA.Infrastructure.DTO;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
 using System.Text.Json;
+using TambolaApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +24,8 @@ var jwtParameters = new JwtTokenParameter()
 };
 
 // Add services to the container.
-builder.Services.AddScoped<IBaseRepository, BaseRepository>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 
 builder.Services.AddDbContext<AppDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -63,11 +63,8 @@ builder.Services.AddHttpsRedirection(options =>
     options.HttpsPort = 44388;
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
-});
+builder.Services.AddAutoMapper(options => {}, typeof(Program));
+
 
 
 var app = builder.Build();

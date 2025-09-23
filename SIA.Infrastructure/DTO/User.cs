@@ -6,65 +6,116 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("UserId", Name = "UQ__Users__1788CCAD55EBB4DD", IsUnique = true)]
+[Index("Mail", Name = "UQ__Users__2724B2D19BCC564E", IsUnique = true)]
+[Index("Username", Name = "UQ__Users__536C85E425BF7584", IsUnique = true)]
 public partial class User
 {
     [Key]
-    [Column("UserRowID")]
-    public int UserRowId { get; set; }
-
-    [Column("UserID")]
-    [StringLength(150)]
-    [Unicode(false)]
-    public string UserId { get; set; } = null!;
-
-    [StringLength(250)]
-    [Unicode(false)]
-    public string Password { get; set; } = null!;
+    public Guid UserId { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
-    public string UserSaltKey { get; set; } = null!;
+    public string Username { get; set; } = null!;
 
-    [StringLength(150)]
+    [StringLength(50)]
     [Unicode(false)]
     public string FirstName { get; set; } = null!;
 
-    [StringLength(150)]
+    [StringLength(50)]
     [Unicode(false)]
     public string LastName { get; set; } = null!;
 
+    [StringLength(100)]
+    [Unicode(false)]
+    public string DisplayName { get; set; } = null!;
+
+    [StringLength(320)]
+    [Unicode(false)]
+    public string Mail { get; set; } = null!;
+
+    [StringLength(5)]
+    [Unicode(false)]
+    public string? CountryCode { get; set; }
+
+    [StringLength(20)]
+    [Unicode(false)]
+    public string? PhoneNumber { get; set; }
+
+    [StringLength(150)]
+    [Unicode(false)]
+    public string ProfileImageUrl { get; set; } = null!;
+
+    [StringLength(255)]
+    [Unicode(false)]
+    public string HashPassword { get; set; } = null!;
+
+    [StringLength(100)]
+    [Unicode(false)]
+    public string PasswordSalt { get; set; } = null!;
+
+    [StringLength(512)]
+    [Unicode(false)]
+    public string? RefreshToken { get; set; }
+
+    [StringLength(50)]
+    [Unicode(false)]
+    public string TimeZone { get; set; } = null!;
+
     [StringLength(10)]
     [Unicode(false)]
-    public string Mobile { get; set; } = null!;
+    public string Language { get; set; } = null!;
 
-    [StringLength(250)]
+    [StringLength(10)]
     [Unicode(false)]
-    public string AccessToken { get; set; } = null!;
+    public string TimeFormat { get; set; } = null!;
 
-    public bool IsActive { get; set; }
+    [StringLength(20)]
+    [Unicode(false)]
+    public string DateFormat { get; set; } = null!;
+
+    public Guid? CreatedUser { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime CreatedOn { get; set; }
+    public DateTime CreatedDate { get; set; }
 
-    public int? CreatedBy { get; set; }
+    public Guid? ModifiedUser { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime UpdatedOn { get; set; }
+    public DateTime ModifiedDate { get; set; }
 
-    public int UpdatedBy { get; set; }
+    public Guid? DeletedUser { get; set; }
 
-    [ForeignKey("CreatedBy")]
-    [InverseProperty("InverseCreatedByNavigation")]
-    public virtual User? CreatedByNavigation { get; set; }
+    [Column(TypeName = "datetime")]
+    public DateTime DeletedDate { get; set; }
 
-    [InverseProperty("CreatedByNavigation")]
-    public virtual ICollection<User> InverseCreatedByNavigation { get; set; } = new List<User>();
+    public bool IsDeleted { get; set; }
 
-    [InverseProperty("UpdatedByNavigation")]
-    public virtual ICollection<User> InverseUpdatedByNavigation { get; set; } = new List<User>();
+    public byte RoleId { get; set; }
 
-    [ForeignKey("UpdatedBy")]
-    [InverseProperty("InverseUpdatedByNavigation")]
-    public virtual User UpdatedByNavigation { get; set; } = null!;
+    public bool IsSignUpUser { get; set; }
+
+    [ForeignKey("CreatedUser")]
+    [InverseProperty("InverseCreatedUserNavigation")]
+    public virtual User? CreatedUserNavigation { get; set; }
+
+    [ForeignKey("DeletedUser")]
+    [InverseProperty("InverseDeletedUserNavigation")]
+    public virtual User? DeletedUserNavigation { get; set; }
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<User> InverseCreatedUserNavigation { get; set; } = new List<User>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<User> InverseDeletedUserNavigation { get; set; } = new List<User>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<User> InverseModifiedUserNavigation { get; set; } = new List<User>();
+
+    [ForeignKey("ModifiedUser")]
+    [InverseProperty("InverseModifiedUserNavigation")]
+    public virtual User? ModifiedUserNavigation { get; set; }
+
+    [ForeignKey("RoleId")]
+    [InverseProperty("Users")]
+    public virtual UserRole Role { get; set; } = null!;
 }

@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using SIA.Domain.Entities;
+using SIA.Domain.Models;
+using SIA.Infrastructure.Interfaces;
 using System.Net;
 
 namespace SIA.Client.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HomeController(IHttpContextAccessor contextAccessor) : ControllerBase
+    public class HomeController(IUserRepository userRepository, IHttpContextAccessor contextAccessor) : ControllerBase
     {
         [HttpGet]
         [Route("start")]
@@ -22,6 +25,14 @@ namespace SIA.Client.API.Controllers
                 ContentType = "text/html",
                 Content = "Server is started"
             };
+        }
+
+        [HttpPost]
+        [Route("signup")]
+        public async Task<IActionResult> CreateAccount([FromBody] UserVM userVM)
+        {
+            ResponseMessage responseMessage = await userRepository.CreateSignUpAccountAsync(userVM);
+            return Ok(responseMessage);
         }
 
         //public async Task<IActionResult> Login([FromBody] LoginRequest request)
