@@ -5,6 +5,7 @@ using SIA.Domain.Entities;
 using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
+using System.Text;
 
 namespace SIA.Client.API.Controllers
 {
@@ -18,18 +19,24 @@ namespace SIA.Client.API.Controllers
         {
             var request = contextAccessor.HttpContext?.Request;
             string logoUrl = $"{request?.Scheme}://{request?.Host}{request?.PathBase}/images/logo.png";
+            string message = new StringBuilder().Append("<html><head><title>App Server</title></head>")
+                                                .Append("<body style='background-color: black;'><div><img style='position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);' src='")
+                                                .Append(logoUrl)
+                                                .Append("'>")
+                                                .Append("<div style='color: white; font-family: Verdana, Geneva, Tahoma;'>App server is running...</div>")
+                                                .Append("</div></body></html>").ToString();
 
             return new ContentResult
             {
                 StatusCode = (int)HttpStatusCode.OK,
                 ContentType = "text/html",
-                Content = "Server is started"
+                Content = message
             };
         }
 
         [HttpGet]
         [Route("test")]
-        public IActionResult Test()
+        public IActionResult Test([FromQuery] string search, [FromQuery] int page)
         {
             return Ok(new ResponseMessage(isSuccess: true, message: "success"));
         }

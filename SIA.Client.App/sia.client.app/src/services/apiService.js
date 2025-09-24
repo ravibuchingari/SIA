@@ -53,7 +53,7 @@ export const refreshAccessToken = async () => {
 }
 
 export const getAsync = async (controllerName, actionName, queryParameters) => { 
-    return api.get(`/${controllerName}/${actionName}${queryParameters ? ("&" + queryParameters) : ''}`);
+    return api.get(`/${controllerName}/${actionName}${queryParameters ? ("?" + queryParameters) : ''}`);
 }
 
 export default api;
