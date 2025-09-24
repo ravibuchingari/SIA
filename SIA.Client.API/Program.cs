@@ -9,7 +9,6 @@ using SIA.Infrastructure.Data;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
 using System.Text.Json;
-using TambolaApi.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,11 +56,11 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 });
 
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-    options.HttpsPort = 44388;
-});
+//builder.Services.AddHttpsRedirection(options =>
+//{
+//    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+//    //options.HttpsPort = 44388;
+//});
 
 builder.Services.AddAutoMapper(options => {}, typeof(Program));
 
@@ -89,7 +88,7 @@ app.UseExceptionMiddleware();
 
 app.UseHsts();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.MapControllers();
 

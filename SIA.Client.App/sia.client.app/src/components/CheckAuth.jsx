@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import useAuth from "./useAuth";
+import useAuth from "../services/useAuth"
 
 const CheckAuth = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
