@@ -11,9 +11,9 @@ import CheckAuth from './components/CheckAuth'
 
 
 function App() {
-  const apiUrl = import.meta.env.VITE_API_URL;
-  const appName = import.meta.env.VITE_APP_NAME;
-  console.log(`API URL: ${apiUrl}, App Name: ${appName}`);
+  //const apiUrl = import.meta.env.VITE_API_URL;
+  //const appName = import.meta.env.VITE_APP_NAME;
+  //console.log(`API URL: ${apiUrl}, App Name: ${appName}`);
 
   return (
     <>

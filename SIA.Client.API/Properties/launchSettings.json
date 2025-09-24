@@ -1,4 +1,17 @@
 {
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:55555",
+      "sslPort": 0
+    },
+    "iis": {
+      "applicationUrl": "http://localhost/sia",
+      "sslPort": 0
+    }
+  },
   "profiles": {
     "http": {
       "commandName": "Project",
@@ -21,22 +34,9 @@
       "launchBrowser": true,
       "launchUrl": "api/home/start",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Production"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true
-    }
-  },
-  "$schema": "https://json.schemastore.org/launchsettings.json",
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:55555",
-      "sslPort": 0
-    },
-    "iis": {
-      "applicationUrl": "http://localhost/sia",
-      "sslPort": 0
     }
   }
 }

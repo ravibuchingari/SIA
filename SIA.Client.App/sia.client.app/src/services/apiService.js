@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true,
     headers: {
         "Content-Type": "application/json",
@@ -50,6 +50,10 @@ export const signIn = async (email, password) => {
 
 export const refreshAccessToken = async () => { 
     return api.post("/auth/refresh-token");
+}
+
+export const getAsync = async (controllerName, actionName, queryParameters) => { 
+    return api.get(`/${controllerName}/${actionName}${queryParameters ? ("&" + queryParameters) : ''}`);
 }
 
 export default api;

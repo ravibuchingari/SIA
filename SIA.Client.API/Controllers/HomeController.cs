@@ -27,6 +27,13 @@ namespace SIA.Client.API.Controllers
             };
         }
 
+        [HttpGet]
+        [Route("test")]
+        public IActionResult Test()
+        {
+            return Ok(new ResponseMessage(isSuccess: true, message: "success"));
+        }
+
         [HttpPost]
         [Route("signup")]
         public async Task<IActionResult> CreateAccount([FromBody] UserVM userVM)
