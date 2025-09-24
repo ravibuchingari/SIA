@@ -16,6 +16,14 @@ public partial class AppDBContext : DbContext
     {
     }
 
+    public virtual DbSet<EmailMessage> EmailMessages { get; set; }
+
+    public virtual DbSet<EmailServer> EmailServers { get; set; }
+
+    public virtual DbSet<Language> Languages { get; set; }
+
+    public virtual DbSet<SiatimeZone> SiatimeZones { get; set; }
+
     public virtual DbSet<SuperUser> SuperUsers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
@@ -24,6 +32,39 @@ public partial class AppDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<EmailMessage>(entity =>
+        {
+            entity.HasKey(e => e.EmailMessageId).HasName("PK__EmailMes__2F4E92AEECA9DB35");
+
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.UpdatedDate).HasDefaultValueSql("(getdate())");
+
+            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.EmailMessageCreatedUserNavigations)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__EmailMess__Creat__787EE5A0");
+
+            entity.HasOne(d => d.UpdatedUserNavigation).WithMany(p => p.EmailMessageUpdatedUserNavigations)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__EmailMess__Updat__7A672E12");
+        });
+
+        modelBuilder.Entity<EmailServer>(entity =>
+        {
+            entity.HasKey(e => e.EmailSmtpHost).HasName("PK__EmailSer__2860E5FCCE680BD5");
+
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+        });
+
+        modelBuilder.Entity<Language>(entity =>
+        {
+            entity.HasKey(e => e.LanguageCode).HasName("PK__Language__8B8C8A3548620497");
+        });
+
+        modelBuilder.Entity<SiatimeZone>(entity =>
+        {
+            entity.HasKey(e => e.TimeZoneName).HasName("PK__TimeZone__7043C63F3B3CE8EE");
+        });
+
         modelBuilder.Entity<SuperUser>(entity =>
         {
             entity.HasKey(e => e.UserRowId).HasName("PK__Users__82B35BF990FABAAB");

@@ -41,45 +41,15 @@ const Header = () => {
           {/* Navigation items */}
           <div className={`collapse navbar-collapse ${isNavOpen ? 'show' : ''}`} id="navbarNav">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <a className="nav-link active" aria-current="page" href="#">
-                  Home
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  About
-                </a>
-              </li>
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  role="button"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  Services
-                </a>
-                <ul className="dropdown-menu">
-                  <li><a className="dropdown-item" href="#">Web Development</a></li>
-                  <li><a className="dropdown-item" href="#">Mobile Apps</a></li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li><a className="dropdown-item" href="#">Consulting</a></li>
-                </ul>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  Contact
-                </a>
-              </li>
             </ul>
-
             {/* Right side items */}
             <div className="d-flex">
               <div className="btn-group" role="group">
-                <button type="button" className="btn btn-light me-2" onClick={handleSignIn}>Sign In</button>
-                <button type="button" className="btn btn-light" onClick={handleSignUp}>Sign Up</button>
+                <div className='d-flex'>
+                  <div className='d-flex align-items-center fw-semibold'>New to SIA?</div>
+                  <button type="button" className="btn btn-outline-light theme-font-color fw-semibold" onClick={handleSignUp}>Sign Up</button>
+                </div>
+                <button type="button" className="btn btn-outline-light theme-font-color fw-semibold me-2" onClick={handleSignIn}>Sign In</button>
               </div>
             </div>
           </div>

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("Mail", Name = "UQ__Users__2724B2D19BCC564E", IsUnique = true)]
+[Index("Email", Name = "UQ__Users__2724B2D19BCC564E", IsUnique = true)]
 [Index("Username", Name = "UQ__Users__536C85E425BF7584", IsUnique = true)]
 public partial class User
 {
@@ -31,7 +31,7 @@ public partial class User
 
     [StringLength(320)]
     [Unicode(false)]
-    public string Mail { get; set; } = null!;
+    public string Email { get; set; } = null!;
 
     [StringLength(5)]
     [Unicode(false)]
@@ -94,6 +94,16 @@ public partial class User
 
     public bool IsSignUpUser { get; set; }
 
+    public bool IsEmailVerified { get; set; }
+
+    [StringLength(60)]
+    [Unicode(false)]
+    public string? SecretKey { get; set; }
+
+    [StringLength(60)]
+    [Unicode(false)]
+    public string? SecurityKey { get; set; }
+
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
     public virtual User? CreatedUserNavigation { get; set; }
@@ -101,6 +111,12 @@ public partial class User
     [ForeignKey("DeletedUser")]
     [InverseProperty("InverseDeletedUserNavigation")]
     public virtual User? DeletedUserNavigation { get; set; }
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<EmailMessage> EmailMessageCreatedUserNavigations { get; set; } = new List<EmailMessage>();
+
+    [InverseProperty("UpdatedUserNavigation")]
+    public virtual ICollection<EmailMessage> EmailMessageUpdatedUserNavigations { get; set; } = new List<EmailMessage>();
 
     [InverseProperty("CreatedUserNavigation")]
     public virtual ICollection<User> InverseCreatedUserNavigation { get; set; } = new List<User>();

@@ -13,7 +13,7 @@ namespace SIA.Infrastructure.Repositories
 
         public async Task<ResponseMessage> CreateSignUpAccountAsync(UserVM userDTO)
         {
-            User? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Mail == userDTO.Mail);
+            User? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == userDTO.Mail);
             if (user != null)
                 return new ResponseMessage(false, AppMessages.DuplicateEmail);
 
