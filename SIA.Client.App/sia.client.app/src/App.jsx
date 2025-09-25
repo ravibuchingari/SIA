@@ -10,7 +10,8 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import SignUp from './components/SignUp';
 import CheckAuth from './components/checkAuth';
-
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LoadingSpinner from './components/LoadingSpinner';
 
 
 function App() {
@@ -30,7 +31,7 @@ function App() {
             <Route path='/dashboard/admin' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
           </Routes>
           <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" /> 
-          {/* <Footer></Footer> */}
+           <AuthProvider></AuthProvider>
        </BrowserRouter>
     </div>
   )

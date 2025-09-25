@@ -84,22 +84,18 @@ const SignUp = () => {
     };
 
     return (
-        <div className="container-fluid p-2">
-            <div className="row g-0">
-                <div className="col-md py-4 ps-4">
+        <div className="container-fluid container-fluid-custom">
+            <div className="row g-0" style={{ height: "calc(100vh - 70px)" }}>
+                <div className="col-md">
                     <div
                         style={{ width: "100%", height: "100%" }}
-                        className="align-items-center justify-content-center"
-                    >
-                        <img
-                            src={bannerLogo}
-                            style={{ maxWidth: "100%", maxHeight: "100%" }}
-                        />
+                        className="center-block">
+                        <img src={bannerLogo} style={{ display: 'block', width: "auto", height: "calc(100vh - 170px)" }} />
                     </div>
                 </div>
-                <div className="col-md-auto">
-                    <div className="container-400">
-                        <div className="card border-0 p-4 w-100">
+                <div className="col-md-auto" style={{backgroundColor: "#f8f9fa" }}>
+                    <div className="container-500">
+                        <div className="card border-0 p-4 w-100" style={{ backgroundColor: "inherit" }}>
                             <form onSubmit={handleSubmit}>
                                 <div className="text-center mb-5">
                                     <h2>Create your account</h2>
@@ -119,6 +115,7 @@ const SignUp = () => {
                                         maxLength="50"
                                         value={formValues.firstName}
                                         onChange={handleChange}
+                                        required
                                     />
                                     <div className="error">
                                         {formErrors.firstName}
@@ -138,6 +135,7 @@ const SignUp = () => {
                                         maxLength="50"
                                         value={formValues.lastName}
                                         onChange={handleChange}
+                                        required
                                     />
                                     <div className="error">
                                         {formErrors.lastName}
@@ -157,6 +155,7 @@ const SignUp = () => {
                                         maxLength="100"
                                         value={formValues.displayName}
                                         onChange={handleChange}
+                                        required
                                     />
                                     <div className="error">
                                         {formErrors.displayName}
@@ -176,6 +175,7 @@ const SignUp = () => {
                                         maxLength="150"
                                         value={formValues.email}
                                         onChange={handleChange}
+                                        required
                                     />
                                     <div className="error">
                                         {formErrors.email}
@@ -195,6 +195,7 @@ const SignUp = () => {
                                         maxLength="5"
                                         value={formValues.countryCode}
                                         onChange={handleChange}
+                                        required
                                     />
                                     <div className="error">
                                         {formErrors.countryCode}
@@ -313,8 +314,8 @@ const SignUp = () => {
                                     </div>
                                 </div>
 
-                                <div className="text-center mt-3">
-                                    <button className="btn btn-primary">
+                                <div className="text-center mt-5">
+                                    <button className="btn btn-primary w-100">
                                         Create Account
                                     </button>
                                 </div>

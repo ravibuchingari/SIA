@@ -1,45 +1,28 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { getAsync, signIn } from "../services/apiService";
 import { CONTROLLER_HOME } from "../services/constants";
 import { useNavigate } from "react-router-dom";
-import bannerLogo from '../assets/signin.jpg';
-import googleLogo from '../assets/google.svg';
-import microsoftLogo from '../assets/microsoft.svg';
-
+import { useAuth } from '../contexts/AuthContext';
+import bannerLogo from "../assets/signin.jpg";
+import googleLogo from "../assets/google.svg";
+import microsoftLogo from "../assets/microsoft.svg";
 
 const SignIn = () => {
     const socialMediaIcon = {
-        padding: '12px',
-        border: 'solid 1px #ddd',
-        borderRadius: '16px',
-        cursor: 'pointer',
-        width: '48px',
-        height: '48px',
-        objectFit: 'contain',
-        margin: '4px',
+        padding: "12px",
+        border: "solid 1px #ddd",
+        borderRadius: "16px",
+        cursor: "pointer",
+        width: "48px",
+        height: "48px",
+        objectFit: "contain",
+        margin: "4px",
     };
 
-
     const navigate = useNavigate();
-
-    // const handleSubmit = (e) => {
-    //     const params = new URLSearchParams({
-    //         search: "anime",
-    //         page: 2,
-    //     });
-    //     getAsync(CONTROLLER_HOME, "test", params.toString())
-    //         .then((response) => {
-    //             console.log(response.data);
-    //             toast.success("Data fetched successfully!");
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching data:", error);
-    //             toast.error("Failed to fetch data.");
-    //         });
-    // };
-
+    const [user, setUser] = useState(null);
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -47,6 +30,22 @@ const SignIn = () => {
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [isSignUp, setIsSignUp] = useState(false);
+    const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+
+    const handleGoogleSignIn = async () => {
+          try {
+              setErrors("");
+              setIsLoading(true);
+              await signInWithGoogle();
+          } catch (error) {
+              setErrors("Failed to sign in with Google");
+              toast.error("Failed to sign in with Google: " + error.message);
+              console.error(error);
+          } finally {
+              setIsLoading(false);
+          }
+      };
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -91,15 +90,16 @@ const SignIn = () => {
             return;
         }
 
-        setIsLoading(true);
-
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            setErrors("");
+            setIsLoading(true);
+            //await signInWithEmail(email, password);
+        } catch (error) {
+            setErrors("Failed to log in: " + error.message);
+        }
+        finally {
             setIsLoading(false);
-            alert(
-                `Login successful!\nEmail: ${formData.email}\nRemember me: ${formData.rememberMe}`
-            );
-        }, 1500);
+        }
     };
 
     const handleSignUp = (e) => {
@@ -107,11 +107,13 @@ const SignIn = () => {
     };
 
     return (
-        <div className="container-fluid">
+        <div className="container-fluid container-fluid-custom">
             <div className="row g-0">
-                <div className="col-md py-4 ps-4">
-                    <div style={{width: '100%', height: '100%'}} className="align-items-center justify-content-center">
-                        <img src={bannerLogo} style={{maxWidth: '100%', maxHeight: '100%'}} />
+                <div className="col-md">
+                    <div
+                        style={{ width: "100%", height: "100%" }}
+                        className="center-block">
+                        <img src={bannerLogo} style={{ display: 'block', width: "auto", height: "calc(100vh - 170px)" }} />
                     </div>
                 </div>
                 <div className="col-md-auto">
@@ -216,8 +218,15 @@ const SignIn = () => {
                                     </div>
 
                                     <div className="my-4 text-center">
-                                       <img src={googleLogo} style={socialMediaIcon}></img>
-                                       <img src={microsoftLogo} style={socialMediaIcon}></img>
+                                        <img
+                                            src={googleLogo}
+                                            style={socialMediaIcon}
+                                            onClick={handleGoogleSignIn}
+                                        ></img>
+                                        <img
+                                            src={microsoftLogo}
+                                            style={socialMediaIcon}
+                                        ></img>
                                     </div>
                                 </div>
 

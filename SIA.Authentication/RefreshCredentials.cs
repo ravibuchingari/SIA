@@ -1,4 +1,4 @@
-﻿namespace Authentication.JWTAuthenticationManager
+﻿namespace SIA.Authentication
 {
     public class RefreshCredentials
     {

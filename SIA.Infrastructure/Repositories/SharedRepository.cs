@@ -19,7 +19,7 @@ namespace SIA.Infrastructure.Repositories
             {
                 LanguageCode = row.LanguageCode,
                 LanguageName = row.LanguageName
-            }).OrderBy(l => l.LanguageCode).ToListAsync();
+            }).ToListAsync();
         }
 
         public async Task<List<TimeZoneVM>> GetTimeZonesAsync()
@@ -28,7 +28,7 @@ namespace SIA.Infrastructure.Repositories
             {
                 TimeZoneName = row.TimeZoneName,
                 CommonRegions = $"{row.TimeZoneName}-{row.CommonRegions}"
-            }).OrderBy(t => t.TimeZoneName).ToListAsync();
+            }).ToListAsync();
         }
     }
 }

@@ -1,11 +1,6 @@
 :root {
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  font-size: 12px;
+  font-weight: normal;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,7 +10,6 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
 }
 footer {
   color: whitesmoke;
@@ -26,6 +20,7 @@ footer {
 .navbar-custom {
   height: 60px;
   box-shadow: rgba(17, 17, 26, 0.1) 0px 1px 0px;
+  background-color: white;
 }
 .navbar-custom .container {
   max-width: 100vw;
@@ -50,10 +45,14 @@ footer {
 }
 .form-label {
   margin-bottom: 2px;
+  font-weight: normal !important;
 }
-
 .container-400 {
   width: 400px;
+  padding: 16px;
+}
+.container-500 {
+  width: 500px;
   padding: 16px;
 }
 .error {
@@ -61,10 +60,30 @@ footer {
   font-size: 0.875rem;
   margin-top: 4px;
 }
+.center-block {
+  display: flex;
+  justify-content: center; /* horizontal */
+  align-items: center;     /* vertical */
+}
+.container-fluid-custom {
+  padding-top: 60px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100% !important;
+  min-height: 100vh;
+}
 
 @media screen and (max-width:768px) {
-  .container-400 {
-    width: 100vw;
+  :root {
+    font-size: 14px;
+  }
+
+  .container-400, .container-500 {
+    width: 100%;
+  }
+  .container-fluid-custom {
+    padding: 10px;
   }
 }
 

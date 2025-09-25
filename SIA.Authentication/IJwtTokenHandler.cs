@@ -1,5 +1,4 @@
-﻿
-namespace Authentication.JWTAuthenticationManager
+﻿namespace SIA.Authentication
 {
     public interface IJwtTokenHandler
     {

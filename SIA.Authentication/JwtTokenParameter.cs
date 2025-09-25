@@ -1,4 +1,4 @@
-﻿namespace Authentication.JWTAuthenticationManager
+﻿namespace SIA.Authentication
 {
     public class JwtTokenParameter
     {
@@ -6,8 +6,9 @@
         public double TokenValidityInMinutes { get; set; }
         public string ValidIssuer { get; set; } = string.Empty;
         public string ValidAudience { get; set; } = string.Empty;
-        public bool IsValidateIssuer { get; set; } = false;
-        public bool IsValidateAudience { get; set; } = false;
+        public bool IsValidateIssuer { get; set; } = true;
+        public bool IsValidateAudience { get; set; } = true;
+        public bool IsValidateLifetime { get; set; } = true;
         public string Origin { get; set; } = string.Empty;
     }
 }

@@ -1,8 +1,11 @@
 using Authentication.JWTAuthenticationManager;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using SIA.Authentication;
 using SIA.Client.API.Middlewares;
 using SIA.Client.API.Models;
 using SIA.Infrastructure.Data;
@@ -48,9 +51,17 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddJwtAuthenticationExtension(jwtParameters);
-
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthorization();
+
+IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Authentication:Google");
+
+builder.Services.AddJwtAuthentication(jwtParameters);
+
+if(!string.IsNullOrEmpty(googleAuthNSection["ClientId"]) && !string.IsNullOrEmpty(googleAuthNSection["ClientSecretKey"]))
+    builder.Services.AddGoogleAuthentication(googleAuthNSection["ClientId"]!, googleAuthNSection["ClientSecretKey"]!);
+
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

@@ -1,49 +1,39 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Authentication.JWTAuthenticationManager
+namespace SIA.Authentication
 {
     public static class JwtAuthenticationExtension
     {
-        public static void AddJwtAuthenticationExtension(this IServiceCollection services, JwtTokenParameter jwtTokenParameter)
+        public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, JwtTokenParameter jwtTokenParameter)
         {
-            services.AddAuthorization();
-            services.AddAuthentication(option =>
+            services.AddAuthentication(options =>
             {
-                option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            }).AddJwtBearer(option =>
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(option =>
             {
                 option.RequireHttpsMetadata = false;
                 option.SaveToken = true;
-                option.TokenValidationParameters = new TokenValidationParameters()
+                option.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = jwtTokenParameter.IsValidateIssuer,
                     ValidateAudience = jwtTokenParameter.IsValidateAudience,
+                    ValidateLifetime = jwtTokenParameter.IsValidateLifetime,
+                    ValidIssuer = jwtTokenParameter.ValidIssuer,
+                    ValidAudience = jwtTokenParameter.ValidAudience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtTokenParameter.JwtSecurityKey))
-                };
-
-                option.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        var accessToken = context.Request.Query["access_token"];
-                        if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/device-hub"))
-                            context.Token = accessToken;
-                        return Task.CompletedTask;
-                    }
                 };
             });
 
-            //.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-            //{
-            //    options.ClientId = jwtTokenParameter.GoogleClientId;
-            //    options.ClientSecret = jwtTokenParameter.GoogleSecretKey;
-            //    options.ClaimActions.MapJsonKey("urn:google:picture", "picture","url");
-            //});
+            return services;
         }
     }
 }

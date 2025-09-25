@@ -19,7 +19,7 @@ const Header = () => {
 
   return (
     <header>
-      <nav className="navbar navbar-expand-lg navbar-light navbar-custom">
+      <nav className="navbar navbar-expand-lg navbar-light fixed-top navbar-custom">
         <div className="container">
           {/* Brand */}
           <a className="navbar-brand fw-bold" href="#">

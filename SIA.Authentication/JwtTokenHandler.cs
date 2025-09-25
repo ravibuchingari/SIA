@@ -3,7 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Authentication.JWTAuthenticationManager
+namespace SIA.Authentication
 {
     public class JwtTokenHandler(JwtTokenParameter jwtTokenParameter) : IJwtTokenHandler
     {
