@@ -11,6 +11,6 @@ namespace SIA.Domain.Entities
     {
         public string LanguageCode { get; set; } = null!;
 
-        public string LanguageType { get; set; } = null!;
+        public string LanguageName { get; set; } = null!;
     }
 }

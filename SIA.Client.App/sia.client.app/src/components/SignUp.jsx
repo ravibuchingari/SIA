@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
+import { getAsync } from "../services/apiService";
 import bannerLogo from "../assets/signin.jpg";
+import { toast } from "react-toastify";
+import { CONTROLLER_HOME } from "../services/constants";
 // import { ArrowRight, ArrowBigRight } from "lucide-react";
 
 const SignUp = () => {
@@ -14,6 +17,24 @@ const SignUp = () => {
     const [formValues, setFormValues] = useState(initialValues);
     const [formErrors, setFormErrors] = useState({});
     const [isSubmit, setIsSubmit] = useState(false);
+    const [languages, setLanguages] = useState([]);
+    const [timeZones, setTimeZones] = useState([]);
+
+    useEffect(() => {
+        document.title = `Sign Up - ${import.meta.env.VITE_APP_NAME}`;
+        getAsync(CONTROLLER_HOME, "signup/utilities").then((response) => {
+            if(response.data){
+                setLanguages(response.data.languages);
+                setTimeZones(response.data.timeZones);
+            }
+            else {
+                toast.error("Unable to fetch data!");
+            }
+        }
+        ).catch((error) => {
+            toast.error("There was an error! " + (error.response?.data?.message || error.message))
+        });
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -207,18 +228,17 @@ const SignUp = () => {
                                             >
                                                 Language
                                             </label>
-                                             <select
+                                            <select
                                                 className="form-select"
                                                 name="language"
                                                 value={formValues.timeFormat}
                                                 onChange={handleChange}
                                             >
-                                                <option value="en">
-                                                    en
-                                                </option>
-                                                <option value="tel">
-                                                    tel
-                                                </option>
+                                                {
+                                                    languages.map((lang) => (
+                                                        <option key={lang.languageCode} value={lang.languageCode}>{lang.languageName}</option>
+                                                    ))
+                                                }
                                             </select>
                                         </div>
                                         <div className="col">
@@ -228,14 +248,18 @@ const SignUp = () => {
                                             >
                                                 Time Zone
                                             </label>
-                                            <input
-                                                type="text"
-                                                name="timeZone"
-                                                className="form-control"
-                                                maxLength="5"
-                                                value={formValues.language}
+                                             <select
+                                                className="form-select"
+                                                name="language"
+                                                value={formValues.timeFormat}
                                                 onChange={handleChange}
-                                            />
+                                            >
+                                               {
+                                                    timeZones.map((tz) => (
+                                                        <option key={tz.timeZoneName} value={tz.timeZoneName}>{tz.commonRegions}</option>
+                                                    ))
+                                               }
+                                            </select>
                                         </div>
                                     </div>
                                 </div>

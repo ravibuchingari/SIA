@@ -40,11 +40,11 @@ footer {
   font-weight: 600;
   color: #0d6efd;
 }
-.form-control, .btn-primary, .btn-light, .btn-outline-light {
+.form-control, .form-select, .btn-primary, .btn-light, .btn-outline-light {
   font-size: inherit;
   border-radius: 6px;
 }
-.form-control:focus {
+.form-control:focus, .form-select:focus {
   box-shadow: none;
   background-color: rgba(229, 225, 177, 0.2);
 }

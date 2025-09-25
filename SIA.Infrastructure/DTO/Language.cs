@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("LanguageType", Name = "UQ__Language__8B12195FDEA58B74", IsUnique = true)]
+[Index("LanguageName", Name = "UQ__Language__8B12195FDEA58B74", IsUnique = true)]
 public partial class Language
 {
     [Key]
@@ -16,5 +16,5 @@ public partial class Language
 
     [StringLength(30)]
     [Unicode(false)]
-    public string LanguageType { get; set; } = null!;
+    public string LanguageName { get; set; } = null!;
 }

@@ -52,8 +52,8 @@ export const refreshAccessToken = async () => {
     return api.post("/auth/refresh-token");
 }
 
-export const getAsync = async (controllerName, actionName, queryParameters) => { 
-    return api.get(`/${controllerName}/${actionName}${queryParameters ? ("?" + queryParameters) : ''}`);
+export const getAsync = async (controllerName, actionName, query = "") => { 
+    return api.get(`/${controllerName}/${actionName}${query ? `?${query}` : ''}`);
 }
 
 export default api;

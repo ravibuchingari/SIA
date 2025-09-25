@@ -18,7 +18,7 @@ namespace SIA.Infrastructure.Repositories
             return await dbContext.Languages.Select(row => new LanguageVM()
             {
                 LanguageCode = row.LanguageCode,
-                LanguageType = row.LanguageType
+                LanguageName = row.LanguageName
             }).OrderBy(l => l.LanguageCode).ToListAsync();
         }
 

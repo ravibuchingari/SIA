@@ -10,7 +10,6 @@ import microsoftLogo from '../assets/microsoft.svg';
 
 
 const SignIn = () => {
-
     const socialMediaIcon = {
         padding: '12px',
         border: 'solid 1px #ddd',

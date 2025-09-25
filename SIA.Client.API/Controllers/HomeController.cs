@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using SIA.Client.API.Models;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
@@ -11,7 +12,9 @@ namespace SIA.Client.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HomeController(IUserRepository userRepository, IHttpContextAccessor contextAccessor) : ControllerBase
+    public class HomeController(IUserRepository userRepository, 
+                                    ISharedRepository sharedRepository,
+                                    IHttpContextAccessor contextAccessor) : ControllerBase
     {
         [HttpGet]
         [Route("start")]
@@ -40,6 +43,19 @@ namespace SIA.Client.API.Controllers
         {
             return Ok(new ResponseMessage(isSuccess: true, message: "success"));
         }
+
+        [HttpGet]
+        [Route("signup/utilities")]
+        public async Task<IActionResult> GetSignUpUtilities()
+        {
+            SignUpUtilities signUpUtilities = new()
+            {
+                Languages = await sharedRepository.GetLanguagesAsync(),
+                TimeZones = await sharedRepository.GetTimeZonesAsync()
+            };
+            return Ok(signUpUtilities);
+        }
+
 
         [HttpPost]
         [Route("signup")]
