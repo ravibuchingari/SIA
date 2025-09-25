@@ -4,14 +4,14 @@ import './App.css'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import SignIn from './components/SignIn'
-import UserDashboard from './components/UserDashboard'
-import AdminDashboard from './components/AdminDashboard'
+import UserDashboard from './components/user/UserDashboard'
+import AdminDashboard from './components/admin/AdminDashboard'
 import Header from './components/Header';
 import Footer from './components/Footer';
 import SignUp from './components/SignUp';
 import CheckAuth from './components/checkAuth';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoadingSpinner from './components/LoadingSpinner';
+import AuthenticationSuccess from './components/user/AuthenticationSuccess';
 
 
 function App() {
@@ -21,17 +21,16 @@ function App() {
 
   return (
     <div>
-   
         <BrowserRouter>
           <Header></Header>
           <Routes>
             <Route path='/signin' element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path='/dashboard/user' element={<CheckAuth><UserDashboard /></CheckAuth>} />
-            <Route path='/dashboard/admin' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
+            <Route path='/user/auth/success' element={<AuthenticationSuccess />} />
+            <Route path='/user/dashboard' element={<CheckAuth><UserDashboard /></CheckAuth>} />
+            <Route path='/admin/dashboard' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
           </Routes>
           <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" /> 
-           <AuthProvider></AuthProvider>
        </BrowserRouter>
     </div>
   )

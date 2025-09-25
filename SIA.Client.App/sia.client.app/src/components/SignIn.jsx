@@ -4,7 +4,6 @@ import { toast } from "react-toastify";
 import { getAsync, signIn } from "../services/apiService";
 import { CONTROLLER_HOME } from "../services/constants";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from '../contexts/AuthContext';
 import bannerLogo from "../assets/signin.jpg";
 import googleLogo from "../assets/google.svg";
 import microsoftLogo from "../assets/microsoft.svg";
@@ -31,21 +30,11 @@ const SignIn = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
-    const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
 
     const handleGoogleSignIn = async () => {
-          try {
-              setErrors("");
-              setIsLoading(true);
-              await signInWithGoogle();
-          } catch (error) {
-              setErrors("Failed to sign in with Google");
-              toast.error("Failed to sign in with Google: " + error.message);
-              console.error(error);
-          } finally {
-              setIsLoading(false);
-          }
-      };
+        const returnUrl = "http://localhost:3000";
+        window.location.href = `${import.meta.env.VITE_API_URL}/${CONTROLLER_HOME}/signin/google?returnUrl=${returnUrl}`
+    };
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;

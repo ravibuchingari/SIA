@@ -1,13 +1,8 @@
-using Authentication.JWTAuthenticationManager;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using SIA.Authentication;
 using SIA.Client.API.Middlewares;
-using SIA.Client.API.Models;
 using SIA.Infrastructure.Data;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
@@ -59,7 +54,7 @@ IConfigurationSection googleAuthNSection = builder.Configuration.GetSection("Aut
 
 builder.Services.AddJwtAuthentication(jwtParameters);
 
-if(!string.IsNullOrEmpty(googleAuthNSection["ClientId"]) && !string.IsNullOrEmpty(googleAuthNSection["ClientSecretKey"]))
+if (!string.IsNullOrEmpty(googleAuthNSection["ClientId"]) && !string.IsNullOrEmpty(googleAuthNSection["ClientSecretKey"]))
     builder.Services.AddGoogleAuthentication(googleAuthNSection["ClientId"]!, googleAuthNSection["ClientSecretKey"]!);
 
 
@@ -74,7 +69,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 //    //options.HttpsPort = 44388;
 //});
 
-builder.Services.AddAutoMapper(options => {}, typeof(Program));
+builder.Services.AddAutoMapper(options => { }, typeof(Program));
 
 
 

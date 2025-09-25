@@ -1,21 +1,42 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
 using SIA.Client.API.Models;
 using SIA.Domain.Entities;
+using SIA.Domain.Exceptions;
 using SIA.Domain.Models;
+using SIA.Infrastructure.DTO;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 
 namespace SIA.Client.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HomeController(IUserRepository userRepository, 
+    public class HomeController(IUserRepository userRepository,
                                     ISharedRepository sharedRepository,
+                                    LinkGenerator linkGenerator,
                                     IHttpContextAccessor contextAccessor) : ControllerBase
     {
+        public void SetCookie(string cookieName, string cookieValue, DateTime expires)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = expires 
+            };
+            //DateTimeOffset.UtcNow.AddDays(7)
+            Response.Cookies.Append(cookieName, cookieValue, cookieOptions);
+        }
+
+
         [HttpGet]
         [Route("start")]
         public ContentResult Start()
@@ -64,6 +85,48 @@ namespace SIA.Client.API.Controllers
             ResponseMessage responseMessage = await userRepository.CreateSignUpAccountAsync(userVM);
             return Ok(responseMessage);
         }
+
+        [HttpGet]
+        [Route("signin/google")]
+        public IActionResult SignInWithGooggle([FromQuery] string returnUrl)
+        {
+            string? redirectUrl = linkGenerator.GetUriByAction(HttpContext,"SignInWithGooggleCallback", "Home", new { returnUrl });
+            var props = new AuthenticationProperties() { RedirectUri = redirectUrl };
+            return Challenge(props, "Google");
+        }
+
+        [HttpGet]
+        [Route("signin/google/callback")]
+        public async Task<IActionResult> SignInWithGooggleCallback()
+        {
+            string provider = "Google";
+
+            var result = await HttpContext.AuthenticateAsync(provider);
+
+            if (!result.Succeeded)
+                throw new ExternalProviderException(provider, "Google authentication failed");
+
+            ClaimsPrincipal claimPrincipal = result.Principal; //.FirstOrDefault()?.Claims.Select(claim => new { claim.Type, claim.Value });
+
+            if (claimPrincipal == null)
+                throw new ExternalProviderException(provider, "Failed to fetch user details during Google authentication.");
+
+            string? email = claimPrincipal.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(email))
+                throw new ExternalProviderException(provider, "Unable to retrieve the user's email address.");
+
+            UserLoginInfo info = new(provider, claimPrincipal.FindFirstValue(ClaimTypes.Email) ?? string.Empty, provider);
+
+            var token = ""; //GenerateJwtToken(result.Principal);
+
+            return Ok(new
+            {
+                token,
+                user = claimPrincipal
+            });
+        }
+
 
         //public async Task<IActionResult> Login([FromBody] LoginRequest request)
         //{
