@@ -12,9 +12,9 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("accessToken");  
-        if (token) {
+        if (token)
             config.headers["Authorization"] = `Bearer ${token}`;
-        }
+        config.headers["Content-Type"] = "application/json";
         return config;
     },
     (error) => {
@@ -54,6 +54,10 @@ export const refreshAccessToken = async () => {
 
 export const getAsync = async (controllerName, actionName, query = "") => { 
     return api.get(`/${controllerName}/${actionName}${query ? `?${query}` : ''}`);
+}
+
+export const postAsync = async (controllerName, actionName, jsonString) => { 
+    return api.post(`/${controllerName}/${actionName}`, jsonString);
 }
 
 export default api;

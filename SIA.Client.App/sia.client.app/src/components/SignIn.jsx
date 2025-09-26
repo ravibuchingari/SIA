@@ -4,9 +4,13 @@ import { toast } from "react-toastify";
 import { getAsync, signIn } from "../services/apiService";
 import { CONTROLLER_HOME } from "../services/constants";
 import { useNavigate } from "react-router-dom";
+
 import bannerLogo from "../assets/signin.jpg";
 import googleLogo from "../assets/google.svg";
 import microsoftLogo from "../assets/microsoft.svg";
+import GoogleAuthentication from "./social/GoogleAuthentication";
+
+
 
 const SignIn = () => {
     const socialMediaIcon = {
@@ -32,8 +36,8 @@ const SignIn = () => {
     const [isSignUp, setIsSignUp] = useState(false);
 
     const handleGoogleSignIn = async () => {
-        const returnUrl = "http://localhost:3000";
-        window.location.href = `${import.meta.env.VITE_API_URL}/${CONTROLLER_HOME}/signin/google?returnUrl=${returnUrl}`
+        //const returnUrl = "http://localhost:3000";
+        //window.location.href = `${import.meta.env.VITE_API_URL}/${CONTROLLER_HOME}/signin/google?returnUrl=${returnUrl}`
     };
 
     const handleInputChange = (e) => {
@@ -207,11 +211,12 @@ const SignIn = () => {
                                     </div>
 
                                     <div className="my-4 text-center">
-                                        <img
+                                        <GoogleAuthentication></GoogleAuthentication>
+                                        {/* <img
                                             src={googleLogo}
                                             style={socialMediaIcon}
                                             onClick={handleGoogleSignIn}
-                                        ></img>
+                                        ></img> */}
                                         <img
                                             src={microsoftLogo}
                                             style={socialMediaIcon}

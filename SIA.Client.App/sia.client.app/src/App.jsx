@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
 import { ToastContainer, toast } from 'react-toastify';
@@ -11,7 +11,7 @@ import Footer from './components/Footer';
 import SignUp from './components/SignUp';
 import CheckAuth from './components/checkAuth';
 import LoadingSpinner from './components/LoadingSpinner';
-import AuthenticationSuccess from './components/user/AuthenticationSuccess';
+import OAuthSuccess from './components/user/OAuthSuccess';
 
 
 function App() {
@@ -25,8 +25,9 @@ function App() {
           <Header></Header>
           <Routes>
             <Route path='/signin' element={<SignIn />} />
+            <Route path='/user/signin' element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path='/user/auth/success' element={<AuthenticationSuccess />} />
+            <Route path='/user/oauth/success' element={<OAuthSuccess />} />
             <Route path='/user/dashboard' element={<CheckAuth><UserDashboard /></CheckAuth>} />
             <Route path='/admin/dashboard' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
           </Routes>

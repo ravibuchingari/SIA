@@ -24,8 +24,9 @@ var jwtParameters = new JwtTokenParameter()
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISharedRepository, SharedRepository>();
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
-
 builder.Services.AddDbContext<AppDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpClient<IApiCallerRepository, ApiCallerRepository>();
+
 
 builder.Logging.ClearProviders();
 
