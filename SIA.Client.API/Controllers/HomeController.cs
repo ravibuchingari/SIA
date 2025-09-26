@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using SIA.Client.API.Models;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace SIA.Client.API.Controllers
@@ -14,7 +12,6 @@ namespace SIA.Client.API.Controllers
     [ApiController]
     public class HomeController(IUserRepository userRepository,
                                     ISharedRepository sharedRepository,
-                                    IConfiguration configuration,
                                     IApiCallerRepository apiCallerRepository,
                                     IHttpContextAccessor contextAccessor) : ControllerBase
     {
@@ -95,18 +92,27 @@ namespace SIA.Client.API.Controllers
         [Route("signin/google/validation")]
         public async Task<IActionResult> SignInWithGooggleValidation([FromBody] GoogleAuthVM credential)
         {
-            try
+            //IConfigurationSection googleAuthNSection = configuration.GetSection("Authentication:Google");
+            AuthConfigVM? authConfigVM = await sharedRepository.GetAuthConfigAsync(SIA.Domain.Models.Providers.Google.ToString());
+            if (authConfigVM == null)
+                return BadRequest(AppMessages.ProviderDeactivated);
+
+            GoogleUserInfoVM? userInfo = await apiCallerRepository.GetAsync<GoogleUserInfoVM>(authConfigVM.UserInfoApi!, credential.access_token);
+            if (userInfo == null)
+                return Unauthorized(AppMessages.GoogleUserVerificationFailed);
+            UserVM userVM = new()
             {
-                IConfigurationSection googleAuthNSection = configuration.GetSection("Authentication:Google");
-                GoogleUserInfoVM? userInfo = await apiCallerRepository.GetAsync<GoogleUserInfoVM>(googleAuthNSection["UserinfoApi"]!, credential.access_token);
-                if (userInfo == null)
-                    return Unauthorized(AppMessages.GoogleUserVerificationFailed);
-                return Ok(userInfo);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                SocialAuthId = userInfo.sub,
+                Username = userInfo.email,
+                FirstName = userInfo.given_name,
+                LastName = userInfo.family_name,
+                DisplayName = userInfo.name,
+                ProfileImageUrl = userInfo.picture,
+                Email = userInfo.email,
+                IsEmailVerified = userInfo.email_verified
+            };
+            userVM = await userRepository.CreateSocialMediaAccountAsync(userVM);
+            return Ok(userVM);
         }
     }
 }

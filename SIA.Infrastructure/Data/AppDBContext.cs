@@ -14,6 +14,8 @@ public partial class AppDBContext : DbContext
     {
     }
 
+    public virtual DbSet<AuthConfig> AuthConfigs { get; set; }
+
     public virtual DbSet<EmailMessage> EmailMessages { get; set; }
 
     public virtual DbSet<EmailServer> EmailServers { get; set; }
@@ -28,8 +30,15 @@ public partial class AppDBContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<UserStatus> UserStatuses { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AuthConfig>(entity =>
+        {
+            entity.HasKey(e => e.AuthProvider).HasName("PK__AuthConf__1DDB48FFB94F5614");
+        });
+
         modelBuilder.Entity<EmailMessage>(entity =>
         {
             entity.HasKey(e => e.EmailMessageId).HasName("PK__EmailMes__2F4E92AEECA9DB35");
@@ -88,6 +97,7 @@ public partial class AppDBContext : DbContext
             entity.Property(e => e.ModifiedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.TimeFormat).HasDefaultValue("24H");
             entity.Property(e => e.TimeZone).HasDefaultValue("UTC");
+            entity.Property(e => e.UserStatusId).HasDefaultValue((byte)1);
 
             entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__693CA210");
 
@@ -98,6 +108,15 @@ public partial class AppDBContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Users__RoleId__6FE99F9F");
+
+            entity.HasOne(d => d.UserStatus).WithMany(p => p.Users)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Users_UserStatus");
+        });
+
+        modelBuilder.Entity<UserStatus>(entity =>
+        {
+            entity.HasKey(e => e.UserStatusId).HasName("PK__UserStat__A33F543A842CB830");
         });
 
         OnModelCreatingPartial(modelBuilder);

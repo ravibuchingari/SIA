@@ -1,4 +1,4 @@
-﻿namespace SIA.Domain.Models
+﻿namespace SIA.Domain.Entities
 {
     public class SmtpVM
     {

@@ -3,11 +3,12 @@
     public class UserVM
     {
         public Guid? UserId { get; set; } = null;
+        public string? SocialAuthId { get; set; }
         public string Username { get; set; } = null!;
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public string DisplayName { get; set; } = null!;
-        public string Mail { get; set; } = null!;
+        public string Email { get; set; } = null!;
         public string? CountryCode { get; set; }
         public string? PhoneNumber { get; set; }
         public string ProfileImageUrl { get; set; } = null!;
@@ -20,5 +21,7 @@
         public string DateFormat { get; set; } = null!;
         public byte RoleId { get; set; }
         public bool IsSignUpUser { get; set; }
+        public bool IsEmailVerified { get; set; } = false;
+        public byte UserStatusId { get; set; }
     }
 }

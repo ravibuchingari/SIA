@@ -102,6 +102,12 @@ public partial class User
     [Unicode(false)]
     public string? SecurityKey { get; set; }
 
+    public byte UserStatusId { get; set; }
+
+    [StringLength(30)]
+    [Unicode(false)]
+    public string? SocialAuthId { get; set; }
+
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
     public virtual User? CreatedUserNavigation { get; set; }
@@ -132,4 +138,8 @@ public partial class User
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual UserRole Role { get; set; } = null!;
+
+    [ForeignKey("UserStatusId")]
+    [InverseProperty("Users")]
+    public virtual UserStatus UserStatus { get; set; } = null!;
 }

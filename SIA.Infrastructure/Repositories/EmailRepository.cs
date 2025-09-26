@@ -1,4 +1,5 @@
-﻿using SIA.Domain.Models;
+﻿using SIA.Domain.Entities;
+using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
 using System.Net.Mail;

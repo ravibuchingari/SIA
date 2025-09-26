@@ -7,5 +7,6 @@ namespace SIA.Infrastructure.Interfaces
     public interface IUserRepository
     {
         Task<ResponseMessage> CreateSignUpAccountAsync(UserVM userDTO);
+        Task<UserVM> CreateSocialMediaAccountAsync(UserVM userVM);
     }
 }
