@@ -9,7 +9,6 @@ namespace SIA.Client.API.Models
         public MappingProfile()
         {
             CreateMap<UserVM, User>().ReverseMap();
-            CreateMap<AuthConfigVM, AuthConfig>().ReverseMap();
         }
     }
 }

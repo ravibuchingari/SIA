@@ -3,9 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './index.css'
 import App from './App.jsx'
+import { decryptData, encryptData } from './services/secureData.js';
 
-const clientId = "1000748720541-5etq8npmk17efj5nf69nrlp19b779m9l.apps.googleusercontent.com";
-
+const clientId = decryptData("U2FsdGVkX1+c+q0DIzdeqfQYDHEDj6y8L3crQblaVHqcJAA1R6opidwn/yErYhGyZ0oL+qfgYUZ8dB+HCRGaukmtgi6Bpy/azFEHkt5rpe5TrYZncfQF15oG6kKGhMwo", import.meta.env.VITE_EKEY);
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={clientId}>

@@ -35,10 +35,7 @@ const SignIn = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSignUp, setIsSignUp] = useState(false);
 
-    const handleGoogleSignIn = async () => {
-        //const returnUrl = "http://localhost:3000";
-        //window.location.href = `${import.meta.env.VITE_API_URL}/${CONTROLLER_HOME}/signin/google?returnUrl=${returnUrl}`
-    };
+
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -212,11 +209,6 @@ const SignIn = () => {
 
                                     <div className="my-4 text-center">
                                         <GoogleAuthentication></GoogleAuthentication>
-                                        {/* <img
-                                            src={googleLogo}
-                                            style={socialMediaIcon}
-                                            onClick={handleGoogleSignIn}
-                                        ></img> */}
                                         <img
                                             src={microsoftLogo}
                                             style={socialMediaIcon}

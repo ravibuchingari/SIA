@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using SIA.Infrastructure.DTO;
 
 namespace SIA.Infrastructure.Data;
@@ -13,8 +15,6 @@ public partial class AppDBContext : DbContext
         : base(options)
     {
     }
-
-    public virtual DbSet<AuthConfig> AuthConfigs { get; set; }
 
     public virtual DbSet<EmailMessage> EmailMessages { get; set; }
 
@@ -34,11 +34,6 @@ public partial class AppDBContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AuthConfig>(entity =>
-        {
-            entity.HasKey(e => e.AuthProvider).HasName("PK__AuthConf__1DDB48FFB94F5614");
-        });
-
         modelBuilder.Entity<EmailMessage>(entity =>
         {
             entity.HasKey(e => e.EmailMessageId).HasName("PK__EmailMes__2F4E92AEECA9DB35");

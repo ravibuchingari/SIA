@@ -5,6 +5,7 @@ using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SIA.Client.API.Controllers
 {
@@ -13,10 +14,11 @@ namespace SIA.Client.API.Controllers
     public class HomeController(IUserRepository userRepository,
                                     ISharedRepository sharedRepository,
                                     IApiCallerRepository apiCallerRepository,
+                                    IGlobalConfigRepository globalConfigRepository,
                                     IHttpContextAccessor contextAccessor) : ControllerBase
     {
         //LinkGenerator linkGenerator,
-        public void SetCookie(string cookieName, string cookieValue, DateTime expires)
+        public void SetCookie(string cookieName, string cookieValue, DateTimeOffset expires)
         {
             var cookieOptions = new CookieOptions
             {
@@ -25,7 +27,6 @@ namespace SIA.Client.API.Controllers
                 SameSite = SameSiteMode.Strict,
                 Expires = expires
             };
-            //DateTimeOffset.UtcNow.AddDays(7)
             Response.Cookies.Append(cookieName, cookieValue, cookieOptions);
         }
 
@@ -52,13 +53,6 @@ namespace SIA.Client.API.Controllers
         }
 
         [HttpGet]
-        [Route("test")]
-        public IActionResult Test([FromQuery] string search, [FromQuery] int page)
-        {
-            return Ok(new ResponseMessage(isSuccess: true, message: "success"));
-        }
-
-        [HttpGet]
         [Route("signup/utilities")]
         public async Task<IActionResult> GetSignUpUtilities()
         {
@@ -70,7 +64,6 @@ namespace SIA.Client.API.Controllers
             return Ok(signUpUtilities);
         }
 
-
         [HttpPost]
         [Route("signup")]
         public async Task<IActionResult> CreateAccount([FromBody] UserVM userVM)
@@ -79,25 +72,15 @@ namespace SIA.Client.API.Controllers
             return Ok(responseMessage);
         }
 
-        //[HttpGet]
-        //[Route("signin/google")]
-        //public IActionResult SignInWithGooggle([FromQuery] string returnUrl)
-        //{
-        //    string? redirectUrl = linkGenerator.GetUriByAction(HttpContext,"SignInWithGooggleCallback", "Home", new { returnUrl });
-        //    var props = new AuthenticationProperties() { RedirectUri = redirectUrl };
-        //    return Challenge(props, "Google");
-        //}
-
         [HttpPost]
         [Route("signin/google/validation")]
         public async Task<IActionResult> SignInWithGooggleValidation([FromBody] GoogleAuthVM credential)
         {
-            //IConfigurationSection googleAuthNSection = configuration.GetSection("Authentication:Google");
-            AuthConfigVM? authConfigVM = await sharedRepository.GetAuthConfigAsync(SIA.Domain.Models.Providers.Google.ToString());
+            AuthConfigVM? authConfigVM = await globalConfigRepository.GetAuthConfigAsync(SIA.Domain.Models.Providers.Google.ToString());
             if (authConfigVM == null)
                 return BadRequest(AppMessages.ProviderDeactivated);
 
-            GoogleUserInfoVM? userInfo = await apiCallerRepository.GetAsync<GoogleUserInfoVM>(authConfigVM.UserInfoApi!, credential.access_token);
+            GoogleUserInfoVM? userInfo = await apiCallerRepository.GetAsync<GoogleUserInfoVM>(authConfigVM.UserinfoApi!, credential.access_token);
             if (userInfo == null)
                 return Unauthorized(AppMessages.GoogleUserVerificationFailed);
             UserVM userVM = new()

@@ -11,7 +11,8 @@ import Footer from './components/Footer';
 import SignUp from './components/SignUp';
 import CheckAuth from './components/checkAuth';
 import LoadingSpinner from './components/LoadingSpinner';
-import OAuthSuccess from './components/user/OAuthSuccess';
+import { getAsync } from './services/apiService';
+import { CONTROLLER_HOME } from './services/constants';
 
 
 function App() {
@@ -27,7 +28,6 @@ function App() {
             <Route path='/signin' element={<SignIn />} />
             <Route path='/user/signin' element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path='/user/oauth/success' element={<OAuthSuccess />} />
             <Route path='/user/dashboard' element={<CheckAuth><UserDashboard /></CheckAuth>} />
             <Route path='/admin/dashboard' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
           </Routes>
