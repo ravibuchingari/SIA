@@ -1,24 +1,24 @@
 import React from 'react';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
-import googleLogo from "../../assets/google.svg";
+import googleLogo from "../../../assets/google.svg";
 import { toast } from 'react-toastify';
-import { postAsync } from '../../services/apiService';
-import { CONTROLLER_HOME } from '../../services/constants';
+import { postAsync } from '../../../services/apiService';
+import { CONTROLLER_HOME } from '../../../services/constants';
 
 const GoogleAuthentication = () => {
 
-   const socialMediaIcon = {
-        padding: "12px",
+    const socialMediaIcon = {
+        padding: "8px",
         border: "solid 1px #ddd",
-        borderRadius: "16px",
+        borderRadius: "10px",
         cursor: "pointer",
-        width: "48px",
+        width: "64px",
         height: "48px",
         objectFit: "contain",
         margin: "4px",
     };
 
-  const login = useGoogleLogin({
+  const handleLogin = useGoogleLogin({
     scope: 'openid profile email',
     onSuccess: async codeResponse => {
       try {
@@ -39,11 +39,15 @@ const GoogleAuthentication = () => {
   });
 
   return (
-    <img
-        src={googleLogo}
-        style={socialMediaIcon}
-        onClick={() => login()}
-    ></img>
+      <div style={{userSelect: 'none', textAlign: 'center'}} onClick={() => handleLogin()}>
+          <div>
+              <img
+                  src={googleLogo}
+                  style={socialMediaIcon}
+              ></img>
+          </div>
+          <div>Google</div>
+      </div>
   );
 };
 

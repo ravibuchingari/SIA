@@ -24,18 +24,6 @@ public partial class EmailMessage
     [Column(TypeName = "datetime")]
     public DateTime CreatedDate { get; set; }
 
-    public Guid CreatedUser { get; set; }
-
     [Column(TypeName = "datetime")]
     public DateTime UpdatedDate { get; set; }
-
-    public Guid UpdatedUser { get; set; }
-
-    [ForeignKey("CreatedUser")]
-    [InverseProperty("EmailMessageCreatedUserNavigations")]
-    public virtual User CreatedUserNavigation { get; set; } = null!;
-
-    [ForeignKey("UpdatedUser")]
-    [InverseProperty("EmailMessageUpdatedUserNavigations")]
-    public virtual User UpdatedUserNavigation { get; set; } = null!;
 }

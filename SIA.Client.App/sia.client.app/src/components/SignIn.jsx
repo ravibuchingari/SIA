@@ -6,23 +6,12 @@ import { CONTROLLER_HOME } from "../services/constants";
 import { useNavigate } from "react-router-dom";
 
 import bannerLogo from "../assets/signin.jpg";
-import googleLogo from "../assets/google.svg";
-import microsoftLogo from "../assets/microsoft.svg";
-import GoogleAuthentication from "./social/GoogleAuthentication";
+import GoogleAuthentication from "./social/google/GoogleAuthentication";
+import MicrosoftAuthentication from "./social/microsoft/MicrosoftAuthentication";
 
 
 
 const SignIn = () => {
-    const socialMediaIcon = {
-        padding: "12px",
-        border: "solid 1px #ddd",
-        borderRadius: "16px",
-        cursor: "pointer",
-        width: "48px",
-        height: "48px",
-        objectFit: "contain",
-        margin: "4px",
-    };
 
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
@@ -207,12 +196,11 @@ const SignIn = () => {
                                         </span>
                                     </div>
 
-                                    <div className="my-4 text-center">
-                                        <GoogleAuthentication></GoogleAuthentication>
-                                        <img
-                                            src={microsoftLogo}
-                                            style={socialMediaIcon}
-                                        ></img>
+                                    <div className="my-4">
+                                        <div className="d-flex justify-content-center">
+                                            <GoogleAuthentication></GoogleAuthentication>
+                                            <MicrosoftAuthentication></MicrosoftAuthentication>
+                                        </div>
                                     </div>
                                 </div>
 

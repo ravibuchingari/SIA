@@ -6,12 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("Email", Name = "UQ__Users__2724B2D19BCC564E", IsUnique = true)]
-[Index("Username", Name = "UQ__Users__536C85E425BF7584", IsUnique = true)]
+[Index("Username", Name = "UQ__Users__536C85E47C92A110", IsUnique = true)]
+[Index("UserGuid", Name = "UQ__Users__81B7740D718CFBC8", IsUnique = true)]
+[Index("Email", Name = "UQ__Users__A9D1053453E9899C", IsUnique = true)]
 public partial class User
 {
     [Key]
-    public Guid UserId { get; set; }
+    public long UserId { get; set; }
+
+    [Column("UserGUID")]
+    public Guid UserGuid { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
@@ -73,17 +77,17 @@ public partial class User
     [Unicode(false)]
     public string DateFormat { get; set; } = null!;
 
-    public Guid? CreatedUser { get; set; }
+    public long? CreatedUser { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime CreatedDate { get; set; }
 
-    public Guid? ModifiedUser { get; set; }
+    public long? ModifiedUser { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime ModifiedDate { get; set; }
 
-    public Guid? DeletedUser { get; set; }
+    public long? DeletedUser { get; set; }
 
     [Column(TypeName = "datetime")]
     public DateTime DeletedDate { get; set; }
@@ -110,6 +114,12 @@ public partial class User
     [Unicode(false)]
     public string? SocialAuthId { get; set; }
 
+    public byte? SubscriptionId { get; set; }
+
+    public bool IsOrganization { get; set; }
+
+    public int? OrganizationId { get; set; }
+
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
     public virtual User? CreatedUserNavigation { get; set; }
@@ -117,12 +127,6 @@ public partial class User
     [ForeignKey("DeletedUser")]
     [InverseProperty("InverseDeletedUserNavigation")]
     public virtual User? DeletedUserNavigation { get; set; }
-
-    [InverseProperty("CreatedUserNavigation")]
-    public virtual ICollection<EmailMessage> EmailMessageCreatedUserNavigations { get; set; } = new List<EmailMessage>();
-
-    [InverseProperty("UpdatedUserNavigation")]
-    public virtual ICollection<EmailMessage> EmailMessageUpdatedUserNavigations { get; set; } = new List<EmailMessage>();
 
     [InverseProperty("CreatedUserNavigation")]
     public virtual ICollection<User> InverseCreatedUserNavigation { get; set; } = new List<User>();
@@ -137,9 +141,23 @@ public partial class User
     [InverseProperty("InverseModifiedUserNavigation")]
     public virtual User? ModifiedUserNavigation { get; set; }
 
+    [ForeignKey("OrganizationId")]
+    [InverseProperty("Users")]
+    public virtual Organization? Organization { get; set; }
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<Organization> OrganizationCreatedUserNavigations { get; set; } = new List<Organization>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<Organization> OrganizationModifiedUserNavigations { get; set; } = new List<Organization>();
+
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual UserRole Role { get; set; } = null!;
+
+    [ForeignKey("SubscriptionId")]
+    [InverseProperty("Users")]
+    public virtual Subscription? Subscription { get; set; }
 
     [ForeignKey("UserStatusId")]
     [InverseProperty("Users")]

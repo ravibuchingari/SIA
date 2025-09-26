@@ -22,7 +22,11 @@ public partial class AppDBContext : DbContext
 
     public virtual DbSet<Language> Languages { get; set; }
 
+    public virtual DbSet<Organization> Organizations { get; set; }
+
     public virtual DbSet<SiatimeZone> SiatimeZones { get; set; }
+
+    public virtual DbSet<Subscription> Subscriptions { get; set; }
 
     public virtual DbSet<SuperUser> SuperUsers { get; set; }
 
@@ -40,14 +44,6 @@ public partial class AppDBContext : DbContext
 
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.UpdatedDate).HasDefaultValueSql("(getdate())");
-
-            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.EmailMessageCreatedUserNavigations)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__EmailMess__Creat__787EE5A0");
-
-            entity.HasOne(d => d.UpdatedUserNavigation).WithMany(p => p.EmailMessageUpdatedUserNavigations)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__EmailMess__Updat__7A672E12");
         });
 
         modelBuilder.Entity<EmailServer>(entity =>
@@ -62,9 +58,31 @@ public partial class AppDBContext : DbContext
             entity.HasKey(e => e.LanguageCode).HasName("PK__Language__8B8C8A3548620497");
         });
 
+        modelBuilder.Entity<Organization>(entity =>
+        {
+            entity.HasKey(e => e.OrganizationId).HasName("PK__Organiza__CADB0B12DD4DF271");
+
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.ModifiedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.OrganizationGuid).HasDefaultValueSql("(newid())");
+
+            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.OrganizationCreatedUserNavigations).HasConstraintName("FK__Organizat__Creat__7C1A6C5A");
+
+            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.OrganizationModifiedUserNavigations).HasConstraintName("FK__Organizat__Modif__7D0E9093");
+
+            entity.HasOne(d => d.Subscription).WithMany(p => p.Organizations)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Organizat__Subsc__7E02B4CC");
+        });
+
         modelBuilder.Entity<SiatimeZone>(entity =>
         {
             entity.HasKey(e => e.TimeZoneName).HasName("PK__TimeZone__7043C63F3B3CE8EE");
+        });
+
+        modelBuilder.Entity<Subscription>(entity =>
+        {
+            entity.HasKey(e => e.SubscriptionId).HasName("PK__Subcript__9A2B249D48D00E2A");
         });
 
         modelBuilder.Entity<SuperUser>(entity =>
@@ -82,27 +100,30 @@ public partial class AppDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4CA1341082");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C4AB59ED9");
 
-            entity.Property(e => e.UserId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DateFormat).HasDefaultValue("YYYY-MM-DD");
-            entity.Property(e => e.DeletedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.Language).HasDefaultValue("en");
             entity.Property(e => e.ModifiedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.TimeFormat).HasDefaultValue("24H");
             entity.Property(e => e.TimeZone).HasDefaultValue("UTC");
+            entity.Property(e => e.UserGuid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.UserStatusId).HasDefaultValue((byte)1);
 
-            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__693CA210");
+            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__5BAD9CC8");
 
-            entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.InverseDeletedUserNavigation).HasConstraintName("FK__Users__DeletedUs__6D0D32F4");
+            entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.InverseDeletedUserNavigation).HasConstraintName("FK__Users__DeletedUs__5CA1C101");
 
-            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.InverseModifiedUserNavigation).HasConstraintName("FK__Users__ModifiedU__6B24EA82");
+            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.InverseModifiedUserNavigation).HasConstraintName("FK__Users__ModifiedU__5D95E53A");
+
+            entity.HasOne(d => d.Organization).WithMany(p => p.Users).HasConstraintName("FK__Users__Organizat__7EF6D905");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Users__RoleId__6FE99F9F");
+                .HasConstraintName("FK__Users__RoleId__5E8A0973");
+
+            entity.HasOne(d => d.Subscription).WithMany(p => p.Users).HasConstraintName("FK__Users__Subscript__5F7E2DAC");
 
             entity.HasOne(d => d.UserStatus).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)

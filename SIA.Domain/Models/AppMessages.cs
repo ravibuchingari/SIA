@@ -10,5 +10,8 @@
         public const string ProviderDeactivated = "The provider authentication is temporarily deactivated.";
         public const string GoogleAuthenticationFailed = "Google authentiation failed.";
         public const string GoogleUserVerificationFailed = "Google sign-in was successful, but we couldn’t verify your account. Please contact support or try again";
+        public const string DuplicateOrganizationEmail = "This organization email address is already assigned to another account";
+        public const string AlreadyConvertedToBusiness = "Sorry, the account has already been migrated to a business account";
+        public const string ConvertedToBusinessSuccess = "Your account has been migrated to a business account successfully";
     }
 }

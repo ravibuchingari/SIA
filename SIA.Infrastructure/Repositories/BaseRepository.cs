@@ -1,6 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SIA.Infrastructure.Data;
+using SIA.Infrastructure.DTO;
 
 namespace SIA.Infrastructure.Repositories
 {
@@ -23,6 +25,7 @@ namespace SIA.Infrastructure.Repositories
             }
             throw new Exception(ex.Message);
         }
+
         private static void DetachedEntries(DbUpdateException ex)
         {
             foreach (var entry in ex.Entries)
@@ -42,5 +45,16 @@ namespace SIA.Infrastructure.Repositories
                 ThrowError(ex);
             }
         }
+
+        public async Task<User?> IsValidUserAsync(int userId, string securityKey)
+        {
+            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey).FirstOrDefaultAsync();
+        }
+
+        public async Task<User?> IsValidAdminUserAsync(int userId, string securityKey)
+        {
+            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).FirstOrDefaultAsync();
+        }
+        
     }
 }
