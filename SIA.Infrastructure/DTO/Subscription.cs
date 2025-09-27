@@ -18,7 +18,4 @@ public partial class Subscription
 
     [InverseProperty("Subscription")]
     public virtual ICollection<Organization> Organizations { get; set; } = new List<Organization>();
-
-    [InverseProperty("Subscription")]
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

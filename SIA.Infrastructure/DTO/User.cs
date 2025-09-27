@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("Username", Name = "UQ__Users__536C85E47C92A110", IsUnique = true)]
-[Index("UserGuid", Name = "UQ__Users__81B7740D718CFBC8", IsUnique = true)]
-[Index("Email", Name = "UQ__Users__A9D1053453E9899C", IsUnique = true)]
+[Index("Username", Name = "UQ__Users__536C85E49974E454", IsUnique = true)]
+[Index("UserGuid", Name = "UQ__Users__81B7740DAB55A705", IsUnique = true)]
+[Index("Email", Name = "UQ__Users__A9D1053460ECB39C", IsUnique = true)]
 public partial class User
 {
     [Key]
@@ -16,6 +16,8 @@ public partial class User
 
     [Column("UserGUID")]
     public Guid UserGuid { get; set; }
+
+    public int OrganizationId { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
@@ -77,23 +79,6 @@ public partial class User
     [Unicode(false)]
     public string DateFormat { get; set; } = null!;
 
-    public long? CreatedUser { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime CreatedDate { get; set; }
-
-    public long? ModifiedUser { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime ModifiedDate { get; set; }
-
-    public long? DeletedUser { get; set; }
-
-    [Column(TypeName = "datetime")]
-    public DateTime DeletedDate { get; set; }
-
-    public bool IsDeleted { get; set; }
-
     public byte RoleId { get; set; }
 
     public bool IsSignUpUser { get; set; }
@@ -114,11 +99,22 @@ public partial class User
     [Unicode(false)]
     public string? SocialAuthId { get; set; }
 
-    public byte? SubscriptionId { get; set; }
+    public long? CreatedUser { get; set; }
 
-    public bool IsOrganization { get; set; }
+    [Column(TypeName = "datetime")]
+    public DateTime CreatedDate { get; set; }
 
-    public int? OrganizationId { get; set; }
+    public long? ModifiedUser { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime ModifiedDate { get; set; }
+
+    public long? DeletedUser { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime DeletedDate { get; set; }
+
+    public bool IsDeleted { get; set; }
 
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
@@ -143,10 +139,10 @@ public partial class User
 
     [ForeignKey("OrganizationId")]
     [InverseProperty("Users")]
-    public virtual Organization? Organization { get; set; }
+    public virtual Organization Organization { get; set; } = null!;
 
-    [InverseProperty("CreatedUserNavigation")]
-    public virtual ICollection<Organization> OrganizationCreatedUserNavigations { get; set; } = new List<Organization>();
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<Organization> OrganizationDeletedUserNavigations { get; set; } = new List<Organization>();
 
     [InverseProperty("ModifiedUserNavigation")]
     public virtual ICollection<Organization> OrganizationModifiedUserNavigations { get; set; } = new List<Organization>();
@@ -154,10 +150,6 @@ public partial class User
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual UserRole Role { get; set; } = null!;
-
-    [ForeignKey("SubscriptionId")]
-    [InverseProperty("Users")]
-    public virtual Subscription? Subscription { get; set; }
 
     [ForeignKey("UserStatusId")]
     [InverseProperty("Users")]

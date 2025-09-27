@@ -22,19 +22,15 @@ namespace SIA.Infrastructure.Repositories
             return(organization.OrganizationId, "Success");
         }
 
-        public async Task<ResponseMessage> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM? organizationVM)
+        public async Task<ResponseMessage> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
             User? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == userVM.Email);
             if (user != null)
                 return new ResponseMessage(false, AppMessages.DuplicateEmail);
-            int? OrgId = null;
 
-            if (userVM.IsOrganization)
-            {
-                (OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
-                if (OrgId == null)
-                    return new ResponseMessage(false, message);
-            }
+            (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
+            if (OrgId == null)
+                return new ResponseMessage(false, message);
 
             userVM.OrganizationId = OrgId;
             userVM.RoleId = 1;
@@ -45,7 +41,7 @@ namespace SIA.Infrastructure.Repositories
             return new ResponseMessage(true, AppMessages.AccountSuccess);
         }
 
-        public async Task<UserVM> CreateSocialMediaAccountAsync(UserVM userVM)
+        public async Task<ResponseMessage> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
             User? user = await dbContext.Users.Where(col => col.Email == userVM.Email).FirstOrDefaultAsync();
             if (user != null)
@@ -54,57 +50,66 @@ namespace SIA.Infrastructure.Repositories
             }
             else
             {
+                (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
+                if (OrgId == null)
+                    return new ResponseMessage(false, message);
+
+                userVM.OrganizationId = OrgId;
                 userVM.HashPassword = Guid.NewGuid().ToString();
                 userVM.PasswordSalt = Guid.NewGuid().ToString();
                 userVM.RoleId = 1;
                 userVM.UserStatusId = (byte)SIA.Domain.Models.UserStatus.EmailValidation;
                 user = mapper.Map<User>(userVM);
                 await dbContext.Users.AddAsync(user);
-                await SaveChangesAsync();
             }
-            return mapper.Map<UserVM>(user);
+            await SaveChangesAsync();
+            return new ResponseMessage(true, AppMessages.AccountSuccess);
         }
 
-        public async Task<ResponseMessage> UpdateAccountType(int userId, string securityKey, bool isOrganization, OrganizationVM? organization)
+        public async Task<ResponseMessage> CreateOrganizationAsync(int userId, Guid userGuId, string securityKey, OrganizationVM organizationVM)
         {
-            User? user = await IsValidAdminUserAsync(userId, securityKey);
+            User? user = await dbContext.Users.FirstOrDefaultAsync(col => col.UserId == userId && col.UserGuid == userGuId && col.SecurityKey == securityKey);
+            if (user != null)
+                return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
+
+            (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
+            if (OrgId == null)
+                return new ResponseMessage(false, message);
+            return new ResponseMessage(true, AppMessages.AccountSuccess);
+        }
+
+        public async Task<ResponseMessage> UpdateAccountType(int userId, string securityKey, bool isOrganization)
+        {
+            User? user = await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).FirstOrDefaultAsync();
             if (user == null)
                 return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
 
-            if (isOrganization)
-            {
-                (int? OrgId, string message) = await CreateOrganizationAsync(organization!);
-                if (OrgId == null)
-                    return new ResponseMessage(false, message);
-                user.OrganizationId = OrgId;
-            }
-
-            user.IsOrganization = isOrganization;
-            user.ModifiedDate = DateTime.UtcNow;
-            user.ModifiedUser = userId;
+            Organization organization = await dbContext.Organizations.FirstOrDefaultAsync(col => col.OrganizationId == user.OrganizationId) ?? throw new Exception(AppMessages.UnauthorizedAccess);
+            organization.ModifiedDate = DateTime.UtcNow;
+            organization.ModifiedUser = userId;
             await SaveChangesAsync();
             return new ResponseMessage(true, "Account updated successfully");
         }
 
-        public async Task<ResponseMessage> ConvertIndividualToBusiness(int userId, string securityKey, OrganizationVM organization)
-        {
-            User? user = await IsValidAdminUserAsync(userId, securityKey);
-            if (user == null)
-                return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
+        //public async Task<ResponseMessage> ConvertIndividualToBusiness(int userId, string securityKey, OrganizationVM organization)
+        //{
+        //    User? user = await IsValidAdminUserAsync(userId, securityKey);
+        //    if (user == null)
+        //        return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
 
-            if(user.Organization != null)
-                return new ResponseMessage(false, AppMessages.AlreadyConvertedToBusiness);
+        //    if(user.Organization != null)
+        //        return new ResponseMessage(false, AppMessages.AlreadyConvertedToBusiness);
 
-            (int? OrgId, string message) = await CreateOrganizationAsync(organization!);
-            if (OrgId == null)
-                return new ResponseMessage(false, message);
-            user.OrganizationId = OrgId;
-            user.IsOrganization = true;
-            user.ModifiedDate = DateTime.UtcNow;
-            user.ModifiedUser = userId;
-            await SaveChangesAsync();
-            return new ResponseMessage(true, AppMessages.ConvertedToBusinessSuccess);
-        }
+        //    (int? OrgId, string message) = await CreateOrganizationAsync(organization!);
+        //    if (OrgId == null)
+        //        return new ResponseMessage(false, message);
+        //    user.OrganizationId = OrgId;
+        //    user.IsOrganization = true;
+        //    user.ModifiedDate = DateTime.UtcNow;
+        //    user.ModifiedUser = userId;
+        //    await SaveChangesAsync();
+        //    return new ResponseMessage(true, AppMessages.ConvertedToBusinessSuccess);
+        //}
 
 
     }

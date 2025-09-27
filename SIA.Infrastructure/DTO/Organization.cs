@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
-[Index("OrganizationGuid", Name = "UQ__Organiza__C8AFC2B1E5D95E33", IsUnique = true)]
+[Index("OrganizationGuid", Name = "UQ__Organiza__C8AFC2B10B1FD96D", IsUnique = true)]
 public partial class Organization
 {
     [Key]
@@ -52,9 +52,11 @@ public partial class Organization
 
     public byte SubscriptionId { get; set; }
 
-    [ForeignKey("CreatedUser")]
-    [InverseProperty("OrganizationCreatedUserNavigations")]
-    public virtual User? CreatedUserNavigation { get; set; }
+    public bool IsBusiness { get; set; }
+
+    [ForeignKey("DeletedUser")]
+    [InverseProperty("OrganizationDeletedUserNavigations")]
+    public virtual User? DeletedUserNavigation { get; set; }
 
     [ForeignKey("ModifiedUser")]
     [InverseProperty("OrganizationModifiedUserNavigations")]

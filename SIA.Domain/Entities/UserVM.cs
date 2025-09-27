@@ -30,7 +30,6 @@ namespace SIA.Domain.Entities
         public byte UserStatusId { get; set; }
         public string? SocialAuthId { get; set; }
         public byte? SubscriptionId { get; set; }
-        public bool IsOrganization { get; set; }
         public int? OrganizationId { get; set; }
     }
 }

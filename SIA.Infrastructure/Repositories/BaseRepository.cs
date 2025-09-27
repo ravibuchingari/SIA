@@ -46,14 +46,14 @@ namespace SIA.Infrastructure.Repositories
             }
         }
 
-        public async Task<User?> IsValidUserAsync(int userId, string securityKey)
+        public async Task<bool> IsValidUserAsync(int userId, string securityKey)
         {
-            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey).FirstOrDefaultAsync();
+            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey).AnyAsync();
         }
 
-        public async Task<User?> IsValidAdminUserAsync(int userId, string securityKey)
+        public async Task<bool> IsValidAdminUserAsync(int userId, string securityKey)
         {
-            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).FirstOrDefaultAsync();
+            return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).AnyAsync();
         }
         
     }

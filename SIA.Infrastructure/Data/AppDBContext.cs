@@ -36,6 +36,7 @@ public partial class AppDBContext : DbContext
 
     public virtual DbSet<UserStatus> UserStatuses { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EmailMessage>(entity =>
@@ -60,19 +61,17 @@ public partial class AppDBContext : DbContext
 
         modelBuilder.Entity<Organization>(entity =>
         {
-            entity.HasKey(e => e.OrganizationId).HasName("PK__Organiza__CADB0B12DD4DF271");
+            entity.HasKey(e => e.OrganizationId).HasName("PK__Organiza__CADB0B1291236B75");
 
-            entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
-            entity.Property(e => e.ModifiedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.OrganizationGuid).HasDefaultValueSql("(newid())");
 
-            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.OrganizationCreatedUserNavigations).HasConstraintName("FK__Organizat__Creat__7C1A6C5A");
+            entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.OrganizationDeletedUserNavigations).HasConstraintName("FK_Organizations_Users1");
 
-            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.OrganizationModifiedUserNavigations).HasConstraintName("FK__Organizat__Modif__7D0E9093");
+            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.OrganizationModifiedUserNavigations).HasConstraintName("FK_Organizations_Users");
 
             entity.HasOne(d => d.Subscription).WithMany(p => p.Organizations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Organizat__Subsc__7E02B4CC");
+                .HasConstraintName("FK__Organizat__Subsc__0C50D423");
         });
 
         modelBuilder.Entity<SiatimeZone>(entity =>
@@ -100,7 +99,7 @@ public partial class AppDBContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C4AB59ED9");
+            entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4C272D498E");
 
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.DateFormat).HasDefaultValue("YYYY-MM-DD");
@@ -111,19 +110,19 @@ public partial class AppDBContext : DbContext
             entity.Property(e => e.UserGuid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.UserStatusId).HasDefaultValue((byte)1);
 
-            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__5BAD9CC8");
+            entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__308E3499");
 
-            entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.InverseDeletedUserNavigation).HasConstraintName("FK__Users__DeletedUs__5CA1C101");
+            entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.InverseDeletedUserNavigation).HasConstraintName("FK__Users__DeletedUs__318258D2");
 
-            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.InverseModifiedUserNavigation).HasConstraintName("FK__Users__ModifiedU__5D95E53A");
+            entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.InverseModifiedUserNavigation).HasConstraintName("FK__Users__ModifiedU__32767D0B");
 
-            entity.HasOne(d => d.Organization).WithMany(p => p.Users).HasConstraintName("FK__Users__Organizat__7EF6D905");
+            entity.HasOne(d => d.Organization).WithMany(p => p.Users)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Users__Organizat__336AA144");
 
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Users__RoleId__5E8A0973");
-
-            entity.HasOne(d => d.Subscription).WithMany(p => p.Users).HasConstraintName("FK__Users__Subscript__5F7E2DAC");
+                .HasConstraintName("FK__Users__RoleId__345EC57D");
 
             entity.HasOne(d => d.UserStatus).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)

@@ -66,9 +66,9 @@ namespace SIA.Client.API.Controllers
 
         [HttpPost]
         [Route("signup")]
-        public async Task<IActionResult> CreateAccount([FromBody] UserVM userVM)
+        public async Task<IActionResult> CreateAccount([FromBody] SignUpVM signUpVM)
         {
-            ResponseMessage responseMessage = await userRepository.CreateSignUpAccountAsync(userVM);
+            ResponseMessage responseMessage = await userRepository.CreateSignUpAccountAsync(signUpVM.UserVM, signUpVM.OrganizationVM);
             return Ok(responseMessage);
         }
 
@@ -94,8 +94,20 @@ namespace SIA.Client.API.Controllers
                 Email = userInfo.email,
                 IsEmailVerified = userInfo.email_verified
             };
-            userVM = await userRepository.CreateSocialMediaAccountAsync(userVM);
-            return Ok(userVM);
+            ResponseMessage responseMessage = await userRepository.CreateSocialMediaAccountAsync(userVM, new OrganizationVM());
+            if(responseMessage.IsSuccess)
+                return Ok(responseMessage);
+            else
+                return BadRequest(responseMessage.Message);
         }
+
+        [HttpPost]
+        [Route("org/create/{userId}/{userGuId}/{securityKey}")]
+        public async Task<IActionResult> CreateOrganization([FromRoute] string userId, [FromRoute] string userGuId, [FromRoute] string securityKey, [FromBody] OrganizationVM organizationVM)
+        {   
+            ResponseMessage responseMessage = await userRepository.CreateOrganizationAsync(int.Parse(DataProtection.UrlDecode(userId, AppConstants.ORG_AES_KEY_AND_IV)), DataProtection.StringToGuid(userGuId), securityKey, organizationVM);
+            return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
+        }
+
     }
 }
