@@ -9,7 +9,7 @@
         Deleted = 4
     }
 
-    public enum UserStatus
+    public enum OrgStatus
     {
         EmailValidation = 1,
         Active = 2,

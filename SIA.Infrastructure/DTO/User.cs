@@ -83,8 +83,6 @@ public partial class User
 
     public bool IsSignUpUser { get; set; }
 
-    public bool IsEmailVerified { get; set; }
-
     [StringLength(60)]
     [Unicode(false)]
     public string? SecretKey { get; set; }
@@ -92,8 +90,6 @@ public partial class User
     [StringLength(60)]
     [Unicode(false)]
     public string? SecurityKey { get; set; }
-
-    public byte UserStatusId { get; set; }
 
     [StringLength(30)]
     [Unicode(false)]
@@ -115,6 +111,8 @@ public partial class User
     public DateTime DeletedDate { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public bool IsActive { get; set; }
 
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
@@ -150,8 +148,4 @@ public partial class User
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual UserRole Role { get; set; } = null!;
-
-    [ForeignKey("UserStatusId")]
-    [InverseProperty("Users")]
-    public virtual UserStatus UserStatus { get; set; } = null!;
 }

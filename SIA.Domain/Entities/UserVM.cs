@@ -27,7 +27,7 @@ namespace SIA.Domain.Entities
         public bool IsEmailVerified { get; set; }
         public string? SecretKey { get; set; }
         public string? SecurityKey { get; set; }
-        public byte UserStatusId { get; set; }
+        public bool IsActive { get; set; }
         public string? SocialAuthId { get; set; }
         public byte? SubscriptionId { get; set; }
         public int? OrganizationId { get; set; }

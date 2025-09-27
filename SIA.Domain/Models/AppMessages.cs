@@ -2,6 +2,9 @@
 {
     public static class AppMessages
     {
+        public const string EMAIL_VERIFICATION_ERROR = "EMAIL_VERIFICATION_ERROR";
+        public const string SUCCESS = "SUCCESS";
+
         public const string RequiredField = "This field is required.";
         public const string InvalidEmail = "Please enter a valid email address.";
         public const string UnauthorizedAccess = "You do not have permission to perform this action.";
@@ -15,5 +18,8 @@
         public const string ConvertedToBusinessSuccess = "Your account has been migrated to a business account successfully";
         public const string MailServerNotConfigured = "SMTP server is not configured.";
         public const string MailMessageNotConfigured = "Mail message is not configured.";
+        public const string AuthenticationFailed = "Authentication failed.";
+        public const string UserSuspended = "Your account has been suspended. Please contact the administrator";
+        
     }
 }

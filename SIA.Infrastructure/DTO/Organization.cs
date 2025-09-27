@@ -48,11 +48,20 @@ public partial class Organization
     [Column(TypeName = "datetime")]
     public DateTime? DeletedDate { get; set; }
 
-    public bool IsDeleted { get; set; }
-
     public byte SubscriptionId { get; set; }
 
     public bool IsBusiness { get; set; }
+
+    public bool IsEmailVerified { get; set; }
+
+    [StringLength(60)]
+    [Unicode(false)]
+    public string? EmailVerificationToken { get; set; }
+
+    [Column(TypeName = "datetime")]
+    public DateTime EmailVerificationTokenTime { get; set; }
+
+    public byte OrganizationStatusId { get; set; }
 
     [ForeignKey("DeletedUser")]
     [InverseProperty("OrganizationDeletedUserNavigations")]
@@ -61,6 +70,10 @@ public partial class Organization
     [ForeignKey("ModifiedUser")]
     [InverseProperty("OrganizationModifiedUserNavigations")]
     public virtual User? ModifiedUserNavigation { get; set; }
+
+    [ForeignKey("OrganizationStatusId")]
+    [InverseProperty("Organizations")]
+    public virtual OrganizationStatus OrganizationStatus { get; set; } = null!;
 
     [ForeignKey("SubscriptionId")]
     [InverseProperty("Organizations")]

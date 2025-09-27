@@ -23,8 +23,9 @@ namespace SIA.Domain.Entities
         public DateTime ModifiedDate { get; set; }
         public long? DeletedUser { get; set; }
         public DateTime? DeletedDate { get; set; }
-        public bool IsDeleted { get; set; }
         public byte SubscriptionId { get; set; }
         public bool IsBusiness { get; set; }
+        public bool IsEmailVerified { get; set; }
+        public byte OrganizationStatusId { get; set; }
     }
 }

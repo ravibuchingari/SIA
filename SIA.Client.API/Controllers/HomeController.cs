@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SIA.Client.API.Models;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
@@ -68,6 +70,10 @@ namespace SIA.Client.API.Controllers
         [Route("signup")]
         public async Task<IActionResult> CreateSignUpAccount([FromBody] SignUpVM signUpVM)
         {
+            byte[] saltBytes = DataProtection.GenerateRandomNumber(30);
+            byte[] hashPassword = DataProtection.GetSaltHasPassword(Encoding.ASCII.GetBytes(signUpVM.UserVM.HashPassword), saltBytes);
+            signUpVM.UserVM.HashPassword = DataProtection.EncryptWithIV(Convert.ToBase64String(hashPassword), AppConstants.ORG_AES_KEY_AND_IV);
+            signUpVM.UserVM.PasswordSalt = DataProtection.EncryptWithIV(Convert.ToBase64String(saltBytes), AppConstants.ORG_AES_KEY_AND_IV);
             (UserVM? userVM, ResponseMessage responseMessage) = await userRepository.CreateSignUpAccountAsync(signUpVM.UserVM, signUpVM.OrganizationVM);
             if (responseMessage.IsSuccess && userVM != null)
             {

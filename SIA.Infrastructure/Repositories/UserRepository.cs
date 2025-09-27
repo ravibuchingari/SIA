@@ -34,7 +34,7 @@ namespace SIA.Infrastructure.Repositories
 
             userVM.OrganizationId = OrgId;
             userVM.RoleId = 1;
-            userVM.UserStatusId = (byte)SIA.Domain.Models.UserStatus.EmailValidation;
+            userVM.IsActive = false;
             user = mapper.Map<User>(userVM);
             await dbContext.Users.AddAsync(user);
             await SaveChangesAsync();
@@ -74,7 +74,7 @@ namespace SIA.Infrastructure.Repositories
                 userVM.HashPassword = Guid.NewGuid().ToString();
                 userVM.PasswordSalt = Guid.NewGuid().ToString();
                 userVM.RoleId = 1;
-                userVM.UserStatusId = (byte)SIA.Domain.Models.UserStatus.EmailValidation;
+                userVM.IsActive = true;
                 user = mapper.Map<User>(userVM);
                 await dbContext.Users.AddAsync(user);
             }
@@ -107,10 +107,37 @@ namespace SIA.Infrastructure.Repositories
             return new ResponseMessage(true, "Account updated successfully");
         }
 
-        //public async Task<ResponseMessage> SignInAsync(string userName, string password)
-        //{
-        //    User user = await dbContext.Users.Where(col => col.Username == userName && col.HashPassword == password).FirstOrDefaultAsync();)
-        //}
+        public async Task<(ResponseMessage, SignInSuccessResponse?)> SignInAsync(SignInRequest signInRequest)
+        {
+            User? user = await dbContext.Users.Include(rl => rl.Role).Include(org => org.Organization).Where(col => col.Username == signInRequest.UserName && col.HashPassword == signInRequest.Password && col.Organization.OrganizationStatusId == (byte)OrgStatus.Active).FirstOrDefaultAsync();
+            if (user == null)
+                return (new ResponseMessage(false, AppMessages.AuthenticationFailed), null);
+
+            if (!user.Organization.IsEmailVerified)
+                return (new ResponseMessage(false, AppMessages.EMAIL_VERIFICATION_ERROR), null);
+
+            if (!user.IsActive)
+                return (new ResponseMessage(false, AppMessages.UserSuspended), null);
+
+            user.SecurityKey = signInRequest.SecurityKey;
+            user.SecretKey = signInRequest.SecretKey;
+            await SaveChangesAsync();
+
+            SignInSuccessResponse successResponse = new()
+            {
+                UserId = user.UserId,
+                UserGuid = user.UserGuid.ToString(),
+                DisplayName = user.FirstName,
+                SecurityKey = signInRequest.SecurityKey,
+                SecretKey = signInRequest.SecretKey,
+                OrganizationId = user.OrganizationId,
+                OrganizationGuid = user.Organization.OrganizationGuid.ToString(),
+                OrganizationName = user.Organization.OrganizationName,
+                RoleName = user.Role.RoleName
+            };
+
+            return (new ResponseMessage(true, AppMessages.SUCCESS), successResponse);
+        }
 
         //public async Task<ResponseMessage> ConvertIndividualToBusiness(int userId, string securityKey, OrganizationVM organization)
         //{

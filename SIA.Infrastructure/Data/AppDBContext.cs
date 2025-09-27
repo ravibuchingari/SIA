@@ -24,6 +24,8 @@ public partial class AppDBContext : DbContext
 
     public virtual DbSet<Organization> Organizations { get; set; }
 
+    public virtual DbSet<OrganizationStatus> OrganizationStatuses { get; set; }
+
     public virtual DbSet<SiatimeZone> SiatimeZones { get; set; }
 
     public virtual DbSet<Subscription> Subscriptions { get; set; }
@@ -33,9 +35,6 @@ public partial class AppDBContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
-
-    public virtual DbSet<UserStatus> UserStatuses { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,15 +63,25 @@ public partial class AppDBContext : DbContext
         {
             entity.HasKey(e => e.OrganizationId).HasName("PK__Organiza__CADB0B1291236B75");
 
+            entity.Property(e => e.EmailVerificationTokenTime).HasDefaultValueSql("(getdate())");
             entity.Property(e => e.OrganizationGuid).HasDefaultValueSql("(newid())");
 
             entity.HasOne(d => d.DeletedUserNavigation).WithMany(p => p.OrganizationDeletedUserNavigations).HasConstraintName("FK_Organizations_Users1");
 
             entity.HasOne(d => d.ModifiedUserNavigation).WithMany(p => p.OrganizationModifiedUserNavigations).HasConstraintName("FK_Organizations_Users");
 
+            entity.HasOne(d => d.OrganizationStatus).WithMany(p => p.Organizations)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Organizat__Organ__3EDC53F0");
+
             entity.HasOne(d => d.Subscription).WithMany(p => p.Organizations)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Organizat__Subsc__0C50D423");
+        });
+
+        modelBuilder.Entity<OrganizationStatus>(entity =>
+        {
+            entity.HasKey(e => e.OrganizationStatusId).HasName("PK__Organiza__68BE924FD85FC2B5");
         });
 
         modelBuilder.Entity<SiatimeZone>(entity =>
@@ -109,7 +118,6 @@ public partial class AppDBContext : DbContext
             entity.Property(e => e.TimeFormat).HasDefaultValue("24H");
             entity.Property(e => e.TimeZone).HasDefaultValue("UTC");
             entity.Property(e => e.UserGuid).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.UserStatusId).HasDefaultValue((byte)1);
 
             entity.HasOne(d => d.CreatedUserNavigation).WithMany(p => p.InverseCreatedUserNavigation).HasConstraintName("FK__Users__CreatedUs__308E3499");
 
@@ -124,15 +132,6 @@ public partial class AppDBContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Users__RoleId__345EC57D");
-
-            entity.HasOne(d => d.UserStatus).WithMany(p => p.Users)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Users_UserStatus");
-        });
-
-        modelBuilder.Entity<UserStatus>(entity =>
-        {
-            entity.HasKey(e => e.UserStatusId).HasName("PK__UserStat__A33F543A842CB830");
         });
 
         OnModelCreatingPartial(modelBuilder);
