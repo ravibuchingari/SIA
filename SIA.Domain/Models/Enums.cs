@@ -28,4 +28,9 @@
         PaidPlan = 2,
         BusinessPlan = 3,
     }
+
+    public enum EmailCode
+    {
+        SendMailOnEmailVerification = 1,
+    }
 }

@@ -6,6 +6,6 @@ namespace SIA.Infrastructure.Interfaces
 {
     public interface IEmailRepository
     {
-        Task<ResponseMessage> SendMailAsync(SmtpVM smtpModel);
+        Task<ResponseMessage> SendMailAsync(string toEmail, string toEmailDisplayName, string messageId, string bodyParam1 = "", string bodyParam2 = "");
     }
 }

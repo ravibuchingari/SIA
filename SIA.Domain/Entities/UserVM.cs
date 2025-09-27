@@ -31,5 +31,7 @@ namespace SIA.Domain.Entities
         public string? SocialAuthId { get; set; }
         public byte? SubscriptionId { get; set; }
         public int? OrganizationId { get; set; }
+        public string? Message { get; set; }
+        public OrganizationVM? OrganizationVM { get; set; }
     }
 }

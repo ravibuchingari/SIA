@@ -13,5 +13,7 @@
         public const string DuplicateOrganizationEmail = "This organization email address is already assigned to another account";
         public const string AlreadyConvertedToBusiness = "Sorry, the account has already been migrated to a business account";
         public const string ConvertedToBusinessSuccess = "Your account has been migrated to a business account successfully";
+        public const string MailServerNotConfigured = "SMTP server is not configured.";
+        public const string MailMessageNotConfigured = "Mail message is not configured.";
     }
 }

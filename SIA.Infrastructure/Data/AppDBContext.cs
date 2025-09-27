@@ -44,6 +44,7 @@ public partial class AppDBContext : DbContext
             entity.HasKey(e => e.EmailMessageId).HasName("PK__EmailMes__2F4E92AEECA9DB35");
 
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.EmailDisplayName).HasDefaultValue("SIA");
             entity.Property(e => e.UpdatedDate).HasDefaultValueSql("(getdate())");
         });
 

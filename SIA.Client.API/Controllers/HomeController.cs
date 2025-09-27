@@ -66,10 +66,15 @@ namespace SIA.Client.API.Controllers
 
         [HttpPost]
         [Route("signup")]
-        public async Task<IActionResult> CreateAccount([FromBody] SignUpVM signUpVM)
+        public async Task<IActionResult> CreateSignUpAccount([FromBody] SignUpVM signUpVM)
         {
-            ResponseMessage responseMessage = await userRepository.CreateSignUpAccountAsync(signUpVM.UserVM, signUpVM.OrganizationVM);
-            return Ok(responseMessage);
+            (UserVM? userVM, ResponseMessage responseMessage) = await userRepository.CreateSignUpAccountAsync(signUpVM.UserVM, signUpVM.OrganizationVM);
+            if (responseMessage.IsSuccess && userVM != null)
+            {
+                return Ok(userVM);
+            }
+            else
+                return BadRequest(responseMessage);
         }
 
         [HttpPost]

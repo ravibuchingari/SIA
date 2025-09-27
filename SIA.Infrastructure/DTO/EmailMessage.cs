@@ -26,4 +26,8 @@ public partial class EmailMessage
 
     [Column(TypeName = "datetime")]
     public DateTime UpdatedDate { get; set; }
+
+    [StringLength(100)]
+    [Unicode(false)]
+    public string EmailDisplayName { get; set; } = null!;
 }

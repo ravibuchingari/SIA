@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 
 namespace SIA.Infrastructure.Repositories
 {
-    public class UserRepository(AppDBContext dbContext, IMapper mapper) : BaseRepository(dbContext ?? null), IUserRepository
+    public class UserRepository(AppDBContext dbContext, IEmailRepository emailRepository, IMapper mapper) : BaseRepository(dbContext ?? null), IUserRepository
     {
         private async Task<(int?, string)> CreateOrganizationAsync(OrganizationVM organizationVM)
         {
@@ -22,15 +22,15 @@ namespace SIA.Infrastructure.Repositories
             return(organization.OrganizationId, "Success");
         }
 
-        public async Task<ResponseMessage> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
+        public async Task<(UserVM?, ResponseMessage)> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
-            User? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == userVM.Email);
+            User? user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Email == userVM.Email);
             if (user != null)
-                return new ResponseMessage(false, AppMessages.DuplicateEmail);
+                return (null, new ResponseMessage(false, AppMessages.DuplicateEmail));
 
             (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
             if (OrgId == null)
-                return new ResponseMessage(false, message);
+                return (null, new ResponseMessage(false, message));
 
             userVM.OrganizationId = OrgId;
             userVM.RoleId = 1;
@@ -38,7 +38,23 @@ namespace SIA.Infrastructure.Repositories
             user = mapper.Map<User>(userVM);
             await dbContext.Users.AddAsync(user);
             await SaveChangesAsync();
-            return new ResponseMessage(true, AppMessages.AccountSuccess);
+            ResponseMessage emailResponse = await emailRepository.SendMailAsync(user.Email, user.DisplayName, EmailCode.SendMailOnEmailVerification.ToString(), "generate verification link and add here");
+            userVM = new UserVM
+            {
+                OrganizationId = OrgId,
+                UserId = user.UserId,
+                UserGuid = user.UserGuid,
+                Email = user.Email,
+                OrganizationVM = new OrganizationVM()
+                {
+                    OrganizationGuid = user.Organization.OrganizationGuid,
+                    OrganizationId = user.OrganizationId,
+                    OrganizationName = user.Organization.OrganizationName,
+                    Email = user.Email
+                },
+                Message = emailResponse.Message
+            };
+            return (userVM, new ResponseMessage(true, AppMessages.AccountSuccess));
         }
 
         public async Task<ResponseMessage> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM)
@@ -90,6 +106,11 @@ namespace SIA.Infrastructure.Repositories
             await SaveChangesAsync();
             return new ResponseMessage(true, "Account updated successfully");
         }
+
+        //public async Task<ResponseMessage> SignInAsync(string userName, string password)
+        //{
+        //    User user = await dbContext.Users.Where(col => col.Username == userName && col.HashPassword == password).FirstOrDefaultAsync();)
+        //}
 
         //public async Task<ResponseMessage> ConvertIndividualToBusiness(int userId, string securityKey, OrganizationVM organization)
         //{
