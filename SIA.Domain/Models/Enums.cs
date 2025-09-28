@@ -22,7 +22,7 @@
         Google, Microsoft
     }
 
-    public enum Subscriptions
+    public enum SubscriptionPlans
     {
         FreePlan = 1,
         PaidPlan = 2,

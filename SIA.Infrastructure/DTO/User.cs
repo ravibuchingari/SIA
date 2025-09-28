@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
@@ -59,7 +61,7 @@ public partial class User
 
     [StringLength(512)]
     [Unicode(false)]
-    public string? RefreshToken { get; set; }
+    public string RefreshToken { get; set; } = null!;
 
     [StringLength(50)]
     [Unicode(false)]
@@ -81,9 +83,9 @@ public partial class User
 
     public bool IsSignUpUser { get; set; }
 
-    [StringLength(60)]
+    [StringLength(250)]
     [Unicode(false)]
-    public string? SecretKey { get; set; }
+    public string SecretKey { get; set; } = null!;
 
     [StringLength(60)]
     [Unicode(false)]
@@ -106,11 +108,11 @@ public partial class User
     public long? DeletedUser { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime DeletedDate { get; set; }
-
-    public bool IsDeleted { get; set; }
+    public DateTime? DeletedDate { get; set; }
 
     public bool IsActive { get; set; }
+
+    public bool IsDeleted { get; set; }
 
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]

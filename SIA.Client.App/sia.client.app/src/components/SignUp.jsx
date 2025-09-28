@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAsync } from "../services/apiService";
+import { getAsync, postAsync } from "../services/apiService";
 import bannerLogo from "../assets/signin.jpg";
 import { toast } from "react-toastify";
 import { CONTROLLER_HOME } from "../services/constants";
@@ -45,13 +45,20 @@ const SignUp = () => {
         e.preventDefault();
         setFormErrors(validate(formValues));
         setIsSubmit(true);
+        //console.log(JSON.stringify(formValues))
+        postAsync(CONTROLLER_HOME, "signup/account", formValues).then((response) => {
+            toast.success("success");
+        }).catch((error) => {
+            console.log(error);
+            toast.error(`${error.response?.data?.code || error.code}: ` + (error.response?.data?.message || error.message))
+        });
     };
 
-    useEffect(() => {
-        if (Object.keys(formErrors).length === 0 && isSubmit) {
-            console.log(formValues);
-        }
-    }, [formErrors]);
+    // useEffect(() => {
+    //     if (Object.keys(formErrors).length === 0 && isSubmit) {
+    //         toast.error(JSON.stringify(formErrors));
+    //     }
+    // }, [formErrors]);
 
     const validate = (values) => {
         const errors = {};
@@ -149,7 +156,7 @@ const SignUp = () => {
                                         Display Name
                                     </label>
                                     <input
-                                        type="email"
+                                        type="text"
                                         name="displayName"
                                         className="form-control"
                                         maxLength="100"

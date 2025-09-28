@@ -4,7 +4,7 @@ namespace SIA.Client.API.Models
 {
     public class SignUpVM
     {
-        public UserVM UserVM { get; set; } = null!;
-        public OrganizationVM OrganizationVM { get; set; } = null!;
+        public UserVM User { get; set; } = null!;
+        public OrganizationVM Organization { get; set; } = null!;
     }
 }

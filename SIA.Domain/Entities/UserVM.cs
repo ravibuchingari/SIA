@@ -1,4 +1,6 @@
-﻿namespace SIA.Domain.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SIA.Domain.Entities
 {
     public class UserVM
     {
@@ -13,7 +15,7 @@
         public string? PhoneNumber { get; set; }
         public string ProfileImageUrl { get; set; } = null!;
         public string HashPassword { get; set; } = null!;
-        public string PasswordSalt { get; set; } = null!;
+        public string? PasswordSalt { get; set; }
         public string? RefreshToken { get; set; }
         public string TimeZone { get; set; } = null!;
         public string Language { get; set; } = null!;
@@ -26,9 +28,13 @@
         public string? SecurityKey { get; set; }
         public bool IsActive { get; set; }
         public string? SocialAuthId { get; set; }
-        public byte? SubscriptionId { get; set; }
-        public int? OrganizationId { get; set; }
+        public byte SubscriptionId { get; set; }
+        public int OrganizationId { get; set; }
         public string? Message { get; set; }
+        public long? CreatedUser { get; set; }
+        public DateTime? CreatedDate { get; set; } = DateTime.Now;
+        public long? ModifiedUser { get; set; }
+        public DateTime? ModifiedDate { get; set; } = DateTime.Now;
         public OrganizationVM? OrganizationVM { get; set; }
     }
 }

@@ -8,6 +8,7 @@
         public long UserId { get; set; }
         public string UserGuid { get; set; }
         public string DisplayName { get; set; }
+        public string Email { get; set; }
         public string SecretKey { get; set; }
         public string SecurityKey { get; set; }
         public string AccessToken { get; set; }

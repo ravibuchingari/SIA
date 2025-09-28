@@ -10,5 +10,6 @@
         public bool IsValidateAudience { get; set; } = true;
         public bool IsValidateLifetime { get; set; } = true;
         public string Origin { get; set; } = string.Empty;
+        public int RefreshTokenValidityInMinutes { get; set; } = 20;
     }
 }

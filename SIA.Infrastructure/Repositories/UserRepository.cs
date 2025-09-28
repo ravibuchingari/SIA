@@ -16,6 +16,8 @@ namespace SIA.Infrastructure.Repositories
             if (organization != null)
                 return (null, AppMessages.DuplicateOrganizationEmail);
             organization = mapper.Map<Organization>(organizationVM);
+            organization.SubscriptionId = (byte)SubscriptionPlans.PaidPlan;
+            organization.OrganizationStatusId = (byte)OrgStatus.EmailValidation;
             await dbContext.AddAsync(organization);
             await dbContext.SaveChangesAsync();
             return (organization.OrganizationId, "Success");
@@ -27,33 +29,48 @@ namespace SIA.Infrastructure.Repositories
             if (user != null)
                 return (null, new ResponseMessage(false, AppMessages.DuplicateEmail));
 
-            (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
-            if (OrgId == null)
-                return (null, new ResponseMessage(false, message));
-
-            userVM.OrganizationId = OrgId;
-            userVM.RoleId = 1;
-            userVM.IsActive = false;
-            user = mapper.Map<User>(userVM);
-            await dbContext.Users.AddAsync(user);
-            await SaveChangesAsync();
-            ResponseMessage emailResponse = await emailRepository.SendMailAsync(user.Email, user.DisplayName, EmailCode.SendMailOnEmailVerification.ToString(), "generate verification link and add here");
-            userVM = new UserVM
+            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            try
             {
-                OrganizationId = OrgId,
-                UserId = user.UserId,
-                UserGuid = user.UserGuid,
-                Email = user.Email,
-                OrganizationVM = new OrganizationVM()
+                (int? organizationId, string message) = await CreateOrganizationAsync(organizationVM!);
+                if (organizationId == null)
                 {
-                    OrganizationGuid = user.Organization.OrganizationGuid,
+                    await transaction.RollbackAsync();
+                    return (null, new ResponseMessage(false, message));
+                }
+
+               
+                user = mapper.Map<User>(userVM);
+                user.OrganizationId = organizationId ?? 0;
+                user.RoleId = 1;
+                user.IsActive = false;
+
+                await dbContext.Users.AddAsync(user);
+                await SaveChangesAsync();
+                ResponseMessage emailResponse = await emailRepository.SendMailAsync(user.Email, user.DisplayName, EmailCode.SendMailOnEmailVerification.ToString(), "generate verification link and add here");
+                userVM = new UserVM
+                {
                     OrganizationId = user.OrganizationId,
-                    OrganizationName = user.Organization.OrganizationName,
-                    Email = user.Email
-                },
-                Message = emailResponse.Message
-            };
-            return (userVM, new ResponseMessage(true, AppMessages.AccountSuccess));
+                    UserId = user.UserId,
+                    UserGuid = user.UserGuid,
+                    Email = user.Email,
+                    OrganizationVM = new OrganizationVM()
+                    {
+                        OrganizationGuid = user.Organization.OrganizationGuid,
+                        OrganizationId = user.OrganizationId,
+                        OrganizationName = user.Organization.OrganizationName,
+                        Email = user.Email
+                    },
+                    Message = emailResponse.Message
+                };
+                await transaction.CommitAsync();
+                return (userVM, new ResponseMessage(true, AppMessages.AccountSuccess));
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return (null, new ResponseMessage(false, ex.Message));
+            }
         }
 
         public async Task<ResponseMessage> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM)
@@ -65,11 +82,11 @@ namespace SIA.Infrastructure.Repositories
             }
             else
             {
-                (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
-                if (OrgId == null)
+                (int? organiztionId, string message) = await CreateOrganizationAsync(organizationVM!);
+                if (organiztionId == null)
                     return new ResponseMessage(false, message);
 
-                userVM.OrganizationId = OrgId;
+                userVM.OrganizationId = organiztionId ?? 0;
                 userVM.HashPassword = Guid.NewGuid().ToString();
                 userVM.PasswordSalt = Guid.NewGuid().ToString();
                 userVM.RoleId = 1;
@@ -143,26 +160,27 @@ namespace SIA.Infrastructure.Repositories
             return (new ResponseMessage(true, AppMessages.SUCCESS), successResponse);
         }
 
-        //public async Task<ResponseMessage> ConvertIndividualToBusiness(int userId, string securityKey, OrganizationVM organization)
-        //{
-        //    User? user = await IsValidAdminUserAsync(userId, securityKey);
-        //    if (user == null)
-        //        return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
+        public async Task UpdateRefreshTokenAsync(RefreshTokenVM refreshTokenVM)
+        {
+            var refreshToken = await dbContext.RefreshTokens.FirstOrDefaultAsync(col => col.UserId == refreshTokenVM.UserId);
 
-        //    if(user.Organization != null)
-        //        return new ResponseMessage(false, AppMessages.AlreadyConvertedToBusiness);
+            if (refreshToken == null)
+            {
+                var newToken = mapper.Map<RefreshToken>(refreshTokenVM);
+                await dbContext.AddAsync(newToken);
+            }
+            else
+            {
+                mapper.Map(refreshTokenVM, refreshToken); 
+            }
 
-        //    (int? OrgId, string message) = await CreateOrganizationAsync(organization!);
-        //    if (OrgId == null)
-        //        return new ResponseMessage(false, message);
-        //    user.OrganizationId = OrgId;
-        //    user.IsOrganization = true;
-        //    user.ModifiedDate = DateTime.UtcNow;
-        //    user.ModifiedUser = userId;
-        //    await SaveChangesAsync();
-        //    return new ResponseMessage(true, AppMessages.ConvertedToBusinessSuccess);
-        //}
+            await dbContext.SaveChangesAsync();
 
+        }
 
+        public async Task<bool> ValidateRefreshTokenAsync(int userId, string token)
+        {
+            return await dbContext.RefreshTokens.Where(col => col.UserId == userId && col.Token == token && col.Expires > DateTimeOffset.UtcNow).AnyAsync();
+        }
     }
 }

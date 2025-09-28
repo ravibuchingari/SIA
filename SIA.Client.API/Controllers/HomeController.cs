@@ -1,10 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SIA.Authentication;
 using SIA.Client.API.Models;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
+using SIA.Infrastructure.DTO;
 using SIA.Infrastructure.Interfaces;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 
 namespace SIA.Client.API.Controllers
@@ -31,6 +36,28 @@ namespace SIA.Client.API.Controllers
             Response.Cookies.Append(cookieName, cookieValue, cookieOptions);
         }
 
+        private ClaimsPrincipal? GetPrincipalFromExpiredToken(string accessToken)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtTokenHandler.GetJwtSecurityKey())),
+                ValidateLifetime = false // ignore expiration
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                var principal = tokenHandler.ValidateToken(accessToken, tokenValidationParameters, out SecurityToken securityToken);
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         [HttpGet]
         [Route("start")]
@@ -66,14 +93,14 @@ namespace SIA.Client.API.Controllers
         }
 
         [HttpPost]
-        [Route("signup")]
+        [Route("signup/account")]
         public async Task<IActionResult> CreateSignUpAccount([FromBody] SignUpVM signUpVM)
         {
             byte[] saltBytes = DataProtection.GenerateRandomNumber(30);
-            byte[] hashPassword = DataProtection.GetSaltHasPassword(Encoding.ASCII.GetBytes(signUpVM.UserVM.HashPassword), saltBytes);
-            signUpVM.UserVM.HashPassword = DataProtection.EncryptWithIV(Convert.ToBase64String(hashPassword), AppConstants.ORG_AES_KEY_AND_IV);
-            signUpVM.UserVM.PasswordSalt = DataProtection.EncryptWithIV(Convert.ToBase64String(saltBytes), AppConstants.ORG_AES_KEY_AND_IV);
-            (UserVM? userVM, ResponseMessage responseMessage) = await userRepository.CreateSignUpAccountAsync(signUpVM.UserVM, signUpVM.OrganizationVM);
+            byte[] hashPassword = DataProtection.GetSaltHasPassword(Encoding.ASCII.GetBytes(signUpVM.User.HashPassword), saltBytes);
+            signUpVM.User.HashPassword = DataProtection.EncryptWithIV(Convert.ToBase64String(hashPassword), AppConstants.ORG_AES_KEY_AND_IV);
+            signUpVM.User.PasswordSalt = DataProtection.EncryptWithIV(Convert.ToBase64String(saltBytes), AppConstants.ORG_AES_KEY_AND_IV);
+            (UserVM? userVM, ResponseMessage responseMessage) = await userRepository.CreateSignUpAccountAsync(signUpVM.User, signUpVM.Organization);
             if (responseMessage.IsSuccess && userVM != null)
             {
                 return Ok(userVM);
@@ -119,9 +146,8 @@ namespace SIA.Client.API.Controllers
             return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
         }
 
-
         [HttpPost]
-        [Route("signin/user")]
+        [Route("user/authentication")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest signInRequest)
         {
             signInRequest.SecurityKey = Guid.NewGuid().ToString();
@@ -138,15 +164,38 @@ namespace SIA.Client.API.Controllers
                 TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
                 if (tokenResponse.IsSuccess)
                 {
-                    successResponse.AccessToken = tokenResponse.JwtToken;
-                    //call efcore to strore
-                    return Ok(tokenResponse);
+                    await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
+                    SetCookie("refreshToken", tokenResponse.RefreshToken.Token, tokenResponse.RefreshToken.Expires);
+                    successResponse.AccessToken = tokenResponse.AccessToken;
+                    return Ok(successResponse);
                 }
                 else
                     return BadRequest(tokenResponse.Message);
             }
             else
                 return BadRequest(responseMessage.Message);
+        }
+
+        [HttpPost()]
+        [Route("user/refresh")]
+        public async Task<IActionResult> Refresh([FromBody] TokenRequest tokenRequest)
+        {
+            var principal = GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
+            if (principal == null) return BadRequest("Invalid access token");
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(string.IsNullOrEmpty(userId))
+                return Unauthorized(AppMessages.UnauthorizedAccess);
+
+            bool isValid = await userRepository.ValidateRefreshTokenAsync(int.Parse(userId), tokenRequest.RefreshToken);
+            if (!isValid) return Unauthorized(AppMessages.UnauthorizedAccess);
+
+            TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenByClaimsAcync(principal.Claims);
+
+            await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
+
+            SetCookie("refreshToken", tokenResponse.RefreshToken.Token, tokenResponse.RefreshToken.Expires);
+
+            return Ok(new {accessToken = tokenResponse.AccessToken, refreshToken = tokenResponse.RefreshToken.Token });
         }
     }
 }

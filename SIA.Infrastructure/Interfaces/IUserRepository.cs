@@ -11,6 +11,7 @@ namespace SIA.Infrastructure.Interfaces
         Task<ResponseMessage> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM);
         Task<string> GetSaltKeyAsync(string userName);
         Task<(ResponseMessage, SignInSuccessResponse?)> SignInAsync(SignInRequest signInRequest);
-        //Task<ResponseMessage> UpdateAccountType(int userId, string securityKey, bool isOrganization);
+        Task UpdateRefreshTokenAsync(RefreshTokenVM refreshTokenVM);
+        Task<bool> ValidateRefreshTokenAsync(int userId, string token);
     }
 }

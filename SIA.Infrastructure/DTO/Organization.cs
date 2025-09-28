@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace SIA.Infrastructure.DTO;
 
@@ -29,7 +31,7 @@ public partial class Organization
 
     [StringLength(150)]
     [Unicode(false)]
-    public string? Email { get; set; }
+    public string Email { get; set; } = null!;
 
     public long? CreatedUser { get; set; }
 

@@ -10,6 +10,7 @@ namespace SIA.Client.API.Models
         {
             CreateMap<UserVM, User>().ReverseMap();
             CreateMap<OrganizationVM, Organization>().ReverseMap();
+            CreateMap<RefreshTokenVM, RefreshToken>();
         }
     }
 }
