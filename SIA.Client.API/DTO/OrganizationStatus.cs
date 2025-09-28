@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Table("OrganizationStatus")]
 [Index("OrganizationStatusName", Name = "UQ__Organiza__6605B0610926E443", IsUnique = true)]

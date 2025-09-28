@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SIA.Infrastructure.DTO;
+using SIA.Client.API.DTO;
 
-namespace SIA.Infrastructure.Data;
+namespace SIA.Client.API.Data;
 
 public partial class AppDBContext : DbContext
 {
@@ -23,6 +23,8 @@ public partial class AppDBContext : DbContext
     public virtual DbSet<Organization> Organizations { get; set; }
 
     public virtual DbSet<OrganizationStatus> OrganizationStatuses { get; set; }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public virtual DbSet<SiatimeZone> SiatimeZones { get; set; }
 
@@ -82,6 +84,13 @@ public partial class AppDBContext : DbContext
             entity.HasKey(e => e.OrganizationStatusId).HasName("PK__Organiza__68BE924FD85FC2B5");
         });
 
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("PK__RefreshT__1788CC4C54D13308");
+
+            entity.Property(e => e.UserId).ValueGeneratedNever();
+        });
+
         modelBuilder.Entity<SiatimeZone>(entity =>
         {
             entity.HasKey(e => e.TimeZoneName).HasName("PK__TimeZone__7043C63F3B3CE8EE");
@@ -113,6 +122,9 @@ public partial class AppDBContext : DbContext
             entity.Property(e => e.DateFormat).HasDefaultValue("YYYY-MM-DD");
             entity.Property(e => e.Language).HasDefaultValue("en");
             entity.Property(e => e.ModifiedDate).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.RefreshToken).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.SecretKey).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.SecurityKey).HasDefaultValueSql("(newid())");
             entity.Property(e => e.TimeFormat).HasDefaultValue("24H");
             entity.Property(e => e.TimeZone).HasDefaultValue("UTC");
             entity.Property(e => e.UserGuid).HasDefaultValueSql("(newid())");

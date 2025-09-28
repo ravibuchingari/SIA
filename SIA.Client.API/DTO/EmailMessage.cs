@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("EmailSubject", Name = "UQ__EmailMes__31F4E1A7352AEA18", IsUnique = true)]
 public partial class EmailMessage

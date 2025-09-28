@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("OrganizationGuid", Name = "UQ__Organiza__C8AFC2B10B1FD96D", IsUnique = true)]
 public partial class Organization

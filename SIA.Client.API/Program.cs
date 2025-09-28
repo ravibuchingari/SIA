@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SIA.Authentication;
 using SIA.Client.API.Middlewares;
+using SIA.Domain.Models;
 using SIA.Infrastructure.Data;
 using SIA.Infrastructure.Interfaces;
 using SIA.Infrastructure.Repositories;
@@ -24,6 +25,8 @@ var jwtParameters = new JwtTokenParameter()
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 builder.Services.AddScoped<ISharedRepository, SharedRepository>();
+builder.Services.AddScoped<IJwtTokenHandler, JwtTokenHandler>();
+
 builder.Services.AddSingleton<IGlobalConfigRepository, GlobalConfigRepository>();
 builder.Services.AddDbContext<AppDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddHttpClient<IApiCallerRepository, ApiCallerRepository>();

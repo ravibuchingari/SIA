@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("LanguageName", Name = "UQ__Language__8B12195FDEA58B74", IsUnique = true)]
 public partial class Language

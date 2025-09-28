@@ -1,8 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SIA.Infrastructure.Data;
-using SIA.Infrastructure.DTO;
 
 namespace SIA.Infrastructure.Repositories
 {
@@ -55,6 +53,6 @@ namespace SIA.Infrastructure.Repositories
         {
             return await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).AnyAsync();
         }
-        
+
     }
 }

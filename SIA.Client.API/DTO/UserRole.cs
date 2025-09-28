@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Table("UserRole")]
 [Index("RoleName", Name = "UQ__UserRole__8A2B616065EBE9FD", IsUnique = true)]

@@ -1,6 +1,4 @@
-﻿
-using SIA.Domain.Entities;
-using SIA.Domain.Models;
+﻿using SIA.Domain.Models;
 
 namespace SIA.Infrastructure.Interfaces
 {

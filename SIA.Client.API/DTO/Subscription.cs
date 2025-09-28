@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("SubscriptionName", Name = "UQ__Subcript__0976646B5D95A705", IsUnique = true)]
 public partial class Subscription

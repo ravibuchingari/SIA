@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("Username", Name = "UQ__Users__536C85E49974E454", IsUnique = true)]
 [Index("UserGuid", Name = "UQ__Users__81B7740DAB55A705", IsUnique = true)]
@@ -59,7 +59,7 @@ public partial class User
 
     [StringLength(512)]
     [Unicode(false)]
-    public string? RefreshToken { get; set; }
+    public string RefreshToken { get; set; } = null!;
 
     [StringLength(50)]
     [Unicode(false)]
@@ -81,9 +81,9 @@ public partial class User
 
     public bool IsSignUpUser { get; set; }
 
-    [StringLength(60)]
+    [StringLength(250)]
     [Unicode(false)]
-    public string? SecretKey { get; set; }
+    public string SecretKey { get; set; } = null!;
 
     [StringLength(60)]
     [Unicode(false)]

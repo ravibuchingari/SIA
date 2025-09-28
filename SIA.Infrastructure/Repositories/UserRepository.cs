@@ -5,7 +5,6 @@ using SIA.Domain.Models;
 using SIA.Infrastructure.Data;
 using SIA.Infrastructure.DTO;
 using SIA.Infrastructure.Interfaces;
-using System.Security.Cryptography;
 
 namespace SIA.Infrastructure.Repositories
 {
@@ -19,7 +18,7 @@ namespace SIA.Infrastructure.Repositories
             organization = mapper.Map<Organization>(organizationVM);
             await dbContext.AddAsync(organization);
             await dbContext.SaveChangesAsync();
-            return(organization.OrganizationId, "Success");
+            return (organization.OrganizationId, "Success");
         }
 
         public async Task<(UserVM?, ResponseMessage)> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
@@ -94,7 +93,7 @@ namespace SIA.Infrastructure.Repositories
             return new ResponseMessage(true, AppMessages.AccountSuccess);
         }
 
-        public async Task<ResponseMessage> UpdateAccountType(int userId, string securityKey, bool isOrganization)
+        public async Task<ResponseMessage> UpdateAccountTypeAsync(int userId, string securityKey, bool isOrganization)
         {
             User? user = await dbContext!.Users.Where(col => col.UserId == userId && col.SecurityKey == securityKey && col.RoleId == 1).FirstOrDefaultAsync();
             if (user == null)
@@ -105,6 +104,11 @@ namespace SIA.Infrastructure.Repositories
             organization.ModifiedUser = userId;
             await SaveChangesAsync();
             return new ResponseMessage(true, "Account updated successfully");
+        }
+
+        public async Task<string> GetSaltKeyAsync(string userName)
+        {
+            return await dbContext.Users.Where(col => col.Username == userName).Select(row => row.PasswordSalt).FirstOrDefaultAsync() ?? string.Empty;
         }
 
         public async Task<(ResponseMessage, SignInSuccessResponse?)> SignInAsync(SignInRequest signInRequest)

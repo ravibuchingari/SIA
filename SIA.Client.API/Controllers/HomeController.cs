@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using SIA.Authentication;
 using SIA.Client.API.Models;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
 using SIA.Infrastructure.Interfaces;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SIA.Client.API.Controllers
 {
@@ -17,6 +15,7 @@ namespace SIA.Client.API.Controllers
                                     ISharedRepository sharedRepository,
                                     IApiCallerRepository apiCallerRepository,
                                     IGlobalConfigRepository globalConfigRepository,
+                                    IJwtTokenHandler jwtTokenHandler,
                                     IHttpContextAccessor contextAccessor) : ControllerBase
     {
         //LinkGenerator linkGenerator,
@@ -106,7 +105,7 @@ namespace SIA.Client.API.Controllers
                 IsEmailVerified = userInfo.email_verified
             };
             ResponseMessage responseMessage = await userRepository.CreateSocialMediaAccountAsync(userVM, new OrganizationVM());
-            if(responseMessage.IsSuccess)
+            if (responseMessage.IsSuccess)
                 return Ok(responseMessage);
             else
                 return BadRequest(responseMessage.Message);
@@ -115,10 +114,39 @@ namespace SIA.Client.API.Controllers
         [HttpPost]
         [Route("org/create/{userId}/{userGuId}/{securityKey}")]
         public async Task<IActionResult> CreateOrganization([FromRoute] string userId, [FromRoute] string userGuId, [FromRoute] string securityKey, [FromBody] OrganizationVM organizationVM)
-        {   
+        {
             ResponseMessage responseMessage = await userRepository.CreateOrganizationAsync(int.Parse(DataProtection.UrlDecode(userId, AppConstants.ORG_AES_KEY_AND_IV)), DataProtection.StringToGuid(userGuId), securityKey, organizationVM);
             return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
         }
 
+
+        [HttpPost]
+        [Route("signin/user")]
+        public async Task<IActionResult> SignIn([FromBody] SignInRequest signInRequest)
+        {
+            signInRequest.SecurityKey = Guid.NewGuid().ToString();
+            signInRequest.SecretKey = DataProtection.UrlEncode(Guid.NewGuid().ToString(), AppConstants.ORG_AES_KEY_AND_IV);
+            string passwordSalt = await userRepository.GetSaltKeyAsync(signInRequest.UserName);
+            passwordSalt = DataProtection.DecryptWithIV(passwordSalt, AppConstants.ORG_AES_KEY_AND_IV);
+
+            byte[] hashPassword = DataProtection.GetSaltHasPassword(Encoding.ASCII.GetBytes(signInRequest.Password), Convert.FromBase64String(passwordSalt));
+            signInRequest.Password = DataProtection.EncryptWithIV(Convert.ToBase64String(hashPassword), AppConstants.ORG_AES_KEY_AND_IV);
+
+            (ResponseMessage responseMessage, SignInSuccessResponse? successResponse) = await userRepository.SignInAsync(signInRequest);
+            if (responseMessage.IsSuccess && successResponse != null)
+            {
+                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
+                if (tokenResponse.IsSuccess)
+                {
+                    successResponse.AccessToken = tokenResponse.JwtToken;
+                    //call efcore to strore
+                    return Ok(tokenResponse);
+                }
+                else
+                    return BadRequest(tokenResponse.Message);
+            }
+            else
+                return BadRequest(responseMessage.Message);
+        }
     }
 }

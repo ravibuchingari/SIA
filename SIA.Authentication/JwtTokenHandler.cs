@@ -1,28 +1,50 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using SIA.Domain.Entities;
+using SIA.Domain.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace SIA.Authentication
 {
-    public class JwtTokenHandler(JwtTokenParameter jwtTokenParameter) : IJwtTokenHandler
+    public class JwtTokenHandler(IConfiguration configuration) : IJwtTokenHandler
     {
-        public async Task<AuthenticationResponse> GenerateToken(AuthenticationResponse authenticationResponse, bool isTemporary = false)
+        public static string GenerateRefreshToken()
         {
-            if (string.IsNullOrEmpty(authenticationResponse.UserRowId) ||
-                string.IsNullOrEmpty(authenticationResponse.UserId) ||
-                string.IsNullOrEmpty(authenticationResponse.UserRole) ||
-                string.IsNullOrEmpty(authenticationResponse.SecurityKey))
-                return new AuthenticationResponse() { IsSuccess = false, Message = "User authentication failed." };
+            var randomBytes = new byte[64];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+
+        public async Task<TokenResponse> GenerateTokenAsync(string userId, string userGuId, string role, string securityKey)
+        {
+            if (string.IsNullOrEmpty(userId) ||
+                string.IsNullOrEmpty(userGuId) ||
+                string.IsNullOrEmpty(role) ||
+                string.IsNullOrEmpty(securityKey))
+                return new TokenResponse() { IsSuccess = false, Message = "Authentication failed." };
+
+            JwtTokenParameter jwtTokenParameter = new()
+            {
+                JwtSecurityKey = configuration["JWTSettings:JWTKey"]!,
+                IsValidateIssuer = Convert.ToBoolean(configuration["JWTSettings:IsValidIssuer"]),
+                IsValidateAudience = Convert.ToBoolean(configuration["JWTSettings:IsValidAudience"]),
+                ValidIssuer = configuration["JWTSettings:ValidIssuer"]!,
+                ValidAudience = configuration["JWTSettings:ValidAudience"]!,
+                TokenValidityInMinutes = Convert.ToDouble(configuration["JWTSettings:JWTTokenValidityInMinutes"]),
+            };
 
             byte[] tokenKey = Encoding.ASCII.GetBytes(jwtTokenParameter.JwtSecurityKey);
 
             ClaimsIdentity claimsIdentity = new(
             [
-                new(ClaimTypes.Name, authenticationResponse.UserRowId.ToString()),
-                new(ClaimTypes.Role, authenticationResponse.UserRole),
-                new("UserId", authenticationResponse.UserId),
-                new("SecurityKey", authenticationResponse.SecurityKey),
+                new(ClaimTypes.Name, userId),
+                new(ClaimTypes.Role, role),
+                new("GuId", userGuId),
+                new("SecurityKey", securityKey),
                 new("Origin", jwtTokenParameter.Origin)
             ]);
 
@@ -33,7 +55,7 @@ namespace SIA.Authentication
                 Subject = claimsIdentity,
                 Issuer = jwtTokenParameter.ValidIssuer,
                 Audience = jwtTokenParameter.ValidAudience,
-                Expires = DateTime.UtcNow.AddMinutes(isTemporary == false ? jwtTokenParameter.TokenValidityInMinutes : 5),
+                Expires = DateTime.UtcNow.AddMinutes(jwtTokenParameter.TokenValidityInMinutes),
                 SigningCredentials = signingCredentials,
             };
 
@@ -41,10 +63,22 @@ namespace SIA.Authentication
             SecurityToken securityToken = securityTokenHandler.CreateToken(securityTokenDescriptor);
             string token = securityTokenHandler.WriteToken(securityToken);
 
-            authenticationResponse.JwtToken = token;
-            authenticationResponse.IsSuccess = true;
+            RefreshTokenVM refreshToken = new()
+            {
+                Token = GenerateRefreshToken(),
+                Expires = DateTime.UtcNow.AddDays(1),
+                Created = DateTime.UtcNow,
+                UserId = userId
+            };
 
-            return await Task.FromResult(authenticationResponse);
+            TokenResponse tokenResponse = new()
+            {
+                JwtToken = token,
+                RefreshToken = refreshToken,
+                IsSuccess = true
+            };
+
+            return await Task.FromResult(tokenResponse);
         }
     }
 }

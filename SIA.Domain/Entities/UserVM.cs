@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SIA.Domain.Entities
+﻿namespace SIA.Domain.Entities
 {
     public class UserVM
     {

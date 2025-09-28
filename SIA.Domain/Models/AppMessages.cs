@@ -20,6 +20,6 @@
         public const string MailMessageNotConfigured = "Mail message is not configured.";
         public const string AuthenticationFailed = "Authentication failed.";
         public const string UserSuspended = "Your account has been suspended. Please contact the administrator";
-        
+
     }
 }

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SIA.Infrastructure.DTO;
+namespace SIA.Client.API.DTO;
 
 [Index("UserId", Name = "UQ__Users__1788CCAD2A2F2F49", IsUnique = true)]
 public partial class SuperUser

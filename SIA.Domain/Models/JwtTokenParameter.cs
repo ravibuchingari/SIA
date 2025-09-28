@@ -1,4 +1,4 @@
-﻿namespace SIA.Authentication
+﻿namespace SIA.Domain.Models
 {
     public class JwtTokenParameter
     {
