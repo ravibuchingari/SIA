@@ -25,7 +25,11 @@ namespace SIA.Infrastructure.Repositories
 
         public async Task<(UserVM?, ResponseMessage)> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
-            User? user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Email == userVM.Email);
+            User? user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Username == userVM.Username);
+            if (user != null)
+                return (null, new ResponseMessage(false, AppMessages.DuplicateUsername));
+
+            user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Email == userVM.Email);
             if (user != null)
                 return (null, new ResponseMessage(false, AppMessages.DuplicateEmail));
 
@@ -130,18 +134,21 @@ namespace SIA.Infrastructure.Repositories
 
         public async Task<(ResponseMessage, SignInSuccessResponse?)> SignInAsync(SignInRequest signInRequest)
         {
-            User? user = await dbContext.Users.Include(rl => rl.Role).Include(org => org.Organization).Where(col => col.Username == signInRequest.UserName && col.HashPassword == signInRequest.Password && col.Organization.OrganizationStatusId == (byte)OrgStatus.Active).FirstOrDefaultAsync();
+            User? user = await dbContext.Users.Include(rl => rl.Role).Include(org => org.Organization).Where(col => col.Username == signInRequest.UserName && col.HashPassword == signInRequest.Password && col.IsDeleted == false && col.Organization.OrganizationStatusId != (byte)OrgStatus.Deleted).FirstOrDefaultAsync();
             if (user == null)
                 return (new ResponseMessage(false, AppMessages.AuthenticationFailed), null);
 
-            if (!user.Organization.IsEmailVerified)
+            if (user.Organization.OrganizationStatusId == (byte)OrgStatus.Suspended)
+                return (new ResponseMessage(false, AppMessages.AccountSuspended), null);
+
+            if (!user.Organization.IsEmailVerified || user.Organization.OrganizationStatusId == (byte)OrgStatus.EmailValidation)
                 return (new ResponseMessage(false, AppMessages.EMAIL_VERIFICATION_ERROR), null);
 
             if (!user.IsActive)
                 return (new ResponseMessage(false, AppMessages.UserSuspended), null);
 
             user.SecurityKey = signInRequest.SecurityKey;
-            user.SecretKey = signInRequest.SecretKey;
+            user.SecretKey = signInRequest.SecretKey ?? string.Empty;
             await SaveChangesAsync();
 
             SignInSuccessResponse successResponse = new()
@@ -149,8 +156,8 @@ namespace SIA.Infrastructure.Repositories
                 UserId = user.UserId,
                 UserGuid = user.UserGuid.ToString(),
                 DisplayName = user.FirstName,
-                SecurityKey = signInRequest.SecurityKey,
-                SecretKey = signInRequest.SecretKey,
+                SecurityKey = signInRequest.SecurityKey ?? string.Empty,
+                SecretKey = signInRequest.SecretKey ?? string.Empty,
                 OrganizationId = user.OrganizationId,
                 OrganizationGuid = user.Organization.OrganizationGuid.ToString(),
                 OrganizationName = user.Organization.OrganizationName,

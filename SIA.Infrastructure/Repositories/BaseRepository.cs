@@ -12,11 +12,11 @@ namespace SIA.Infrastructure.Repositories
             {
                 throw sqlExp.Number switch
                 {
-                    1451 => new Exception("You cannot delete the item since it was locked by another transaction."),
-                    1452 => new Exception("Cannot add or update a child row: a foreign key constraint fails"),
-                    2627 => new Exception("Unique constraint error"),
-                    547 => new Exception("Constraint check violation"),
-                    2601 => new Exception("Duplicated key row error/Constraint violation exception"),
+                    1451 => new Exception($"{sqlExp.Message}: You cannot delete the item since it was locked by another transaction."),
+                    1452 => new Exception($"{sqlExp.Message}: Cannot add or update a child row: a foreign key constraint fails"),
+                    2627 => new Exception($"{sqlExp.Message}: Unique constraint error"),
+                    547 => new Exception($"{sqlExp.Message}: Constraint check violation"),
+                    2601 => new Exception($"{sqlExp.Message}: Duplicated key row error/Constraint violation exception"),
                     1062 => new Exception(ex.InnerException.Message.Split("for")[0].Trim()),
                     _ => new Exception(sqlExp.Message),
                 };

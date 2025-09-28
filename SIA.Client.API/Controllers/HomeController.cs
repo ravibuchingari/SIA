@@ -110,7 +110,7 @@ namespace SIA.Client.API.Controllers
         }
 
         [HttpPost]
-        [Route("signin/google/validation")]
+        [Route("signin/google/authentication")]
         public async Task<IActionResult> SignInWithGooggleValidation([FromBody] GoogleAuthVM credential)
         {
             AuthConfigVM? authConfigVM = await globalConfigRepository.GetAuthConfigAsync(SIA.Domain.Models.Providers.Google.ToString());
@@ -147,11 +147,11 @@ namespace SIA.Client.API.Controllers
         }
 
         [HttpPost]
-        [Route("user/authentication")]
+        [Route("signin/email/authentication")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest signInRequest)
         {
             signInRequest.SecurityKey = Guid.NewGuid().ToString();
-            signInRequest.SecretKey = DataProtection.UrlEncode(Guid.NewGuid().ToString(), AppConstants.ORG_AES_KEY_AND_IV);
+            signInRequest.SecretKey = DataProtection.EncryptWithIV(Guid.NewGuid().ToString(), AppConstants.ORG_AES_KEY_AND_IV);
             string passwordSalt = await userRepository.GetSaltKeyAsync(signInRequest.UserName);
             passwordSalt = DataProtection.DecryptWithIV(passwordSalt, AppConstants.ORG_AES_KEY_AND_IV);
 
@@ -164,8 +164,9 @@ namespace SIA.Client.API.Controllers
                 TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
                 if (tokenResponse.IsSuccess)
                 {
+                    successResponse.SecretKey = DataProtection.DecryptWithIV(successResponse.SecretKey, AppConstants.ORG_AES_KEY_AND_IV);
                     await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
-                    SetCookie("refreshToken", tokenResponse.RefreshToken.Token, tokenResponse.RefreshToken.Expires);
+                    SetCookie(AppMessages.COOKIE_REFRESH_TOKEN, DataProtection.EncryptWithIV(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV), tokenResponse.RefreshToken.Expires);
                     successResponse.AccessToken = tokenResponse.AccessToken;
                     return Ok(successResponse);
                 }
@@ -177,9 +178,10 @@ namespace SIA.Client.API.Controllers
         }
 
         [HttpPost()]
-        [Route("user/refresh")]
+        [Route("token/refresh/request")]
         public async Task<IActionResult> Refresh([FromBody] TokenRequest tokenRequest)
         {
+            tokenRequest.RefreshToken = DataProtection.DecryptWithIV(Request.Cookies[AppMessages.COOKIE_REFRESH_TOKEN] ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
             var principal = GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
             if (principal == null) return BadRequest("Invalid access token");
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -195,7 +197,7 @@ namespace SIA.Client.API.Controllers
 
             SetCookie("refreshToken", tokenResponse.RefreshToken.Token, tokenResponse.RefreshToken.Expires);
 
-            return Ok(new {accessToken = tokenResponse.AccessToken, refreshToken = tokenResponse.RefreshToken.Token });
+            return Ok(new {accessToken = tokenResponse.AccessToken, refreshToken = "" });
         }
     }
 }

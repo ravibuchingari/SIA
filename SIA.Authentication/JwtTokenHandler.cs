@@ -59,6 +59,7 @@ namespace SIA.Authentication
 
             ClaimsIdentity claimsIdentity = new(
             [
+                new(ClaimTypes.NameIdentifier, userId),
                 new(ClaimTypes.Name, userId),
                 new(ClaimTypes.Role, role),
                 new("GuId", userGuId),
@@ -84,8 +85,8 @@ namespace SIA.Authentication
             RefreshTokenVM refreshToken = new()
             {
                 Token = GenerateRefreshToken(),
-                Expires = DateTimeOffset.UtcNow.AddMinutes(jwtTokenParameter.RefreshTokenValidityInMinutes),
-                Created = DateTimeOffset.UtcNow,
+                Expires = DateTime.Now.AddMinutes(jwtTokenParameter.RefreshTokenValidityInMinutes),
+                Created = DateTime.Now,
                 UserId = int.Parse(userId)
             };
 
@@ -126,8 +127,8 @@ namespace SIA.Authentication
             RefreshTokenVM refreshToken = new()
             {
                 Token = GenerateRefreshToken(),
-                Expires = DateTimeOffset.UtcNow.AddMinutes(jwtTokenParameter.RefreshTokenValidityInMinutes),
-                Created = DateTimeOffset.UtcNow,
+                Expires = DateTime.Now.AddMinutes(jwtTokenParameter.RefreshTokenValidityInMinutes),
+                Created = DateTime.Now,
                 UserId = Convert.ToInt32(claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value)
             };
 
