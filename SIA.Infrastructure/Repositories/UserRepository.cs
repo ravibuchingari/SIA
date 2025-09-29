@@ -16,7 +16,7 @@ namespace SIA.Infrastructure.Repositories
             if (organization != null)
                 return (null, AppMessages.DuplicateOrganizationEmail);
             organization = mapper.Map<Organization>(organizationVM);
-            organization.SubscriptionId = (byte)SubscriptionPlans.PaidPlan;
+            organization.SubscriptionId = (byte)SubscriptionPlans.Pro;
             organization.OrganizationStatusId = (byte)OrgStatus.EmailValidation;
             await dbContext.AddAsync(organization);
             await dbContext.SaveChangesAsync();

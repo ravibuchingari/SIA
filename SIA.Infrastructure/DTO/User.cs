@@ -114,6 +114,40 @@ public partial class User
 
     public bool IsDeleted { get; set; }
 
+    [StringLength(30)]
+    [Unicode(false)]
+    public string UserStatus { get; set; } = null!;
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<BillingHistory> BillingHistoryCreatedUserNavigations { get; set; } = new List<BillingHistory>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<BillingHistory> BillingHistoryDeletedUserNavigations { get; set; } = new List<BillingHistory>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<BillingHistory> BillingHistoryModifiedUserNavigations { get; set; } = new List<BillingHistory>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<CalendarEvent> CalendarEventCreatedUserNavigations { get; set; } = new List<CalendarEvent>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<CalendarEvent> CalendarEventDeletedUserNavigations { get; set; } = new List<CalendarEvent>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<CalendarEvent> CalendarEventModifiedUserNavigations { get; set; } = new List<CalendarEvent>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<CalendarEvent> CalendarEventUsers { get; set; } = new List<CalendarEvent>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<Coupon> CouponCreatedUserNavigations { get; set; } = new List<Coupon>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<Coupon> CouponDeletedUserNavigations { get; set; } = new List<Coupon>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<Coupon> CouponModifiedUserNavigations { get; set; } = new List<Coupon>();
+
     [ForeignKey("CreatedUser")]
     [InverseProperty("InverseCreatedUserNavigation")]
     public virtual User? CreatedUserNavigation { get; set; }
@@ -123,6 +157,15 @@ public partial class User
     public virtual User? DeletedUserNavigation { get; set; }
 
     [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<EventParticipant> EventParticipantCreatedUserNavigations { get; set; } = new List<EventParticipant>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<EventParticipant> EventParticipantDeletedUserNavigations { get; set; } = new List<EventParticipant>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<EventParticipant> EventParticipantModifiedUserNavigations { get; set; } = new List<EventParticipant>();
+
+    [InverseProperty("CreatedUserNavigation")]
     public virtual ICollection<User> InverseCreatedUserNavigation { get; set; } = new List<User>();
 
     [InverseProperty("DeletedUserNavigation")]
@@ -130,6 +173,33 @@ public partial class User
 
     [InverseProperty("ModifiedUserNavigation")]
     public virtual ICollection<User> InverseModifiedUserNavigation { get; set; } = new List<User>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<Invoice> InvoiceCreatedUserNavigations { get; set; } = new List<Invoice>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<Invoice> InvoiceDeletedUserNavigations { get; set; } = new List<Invoice>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<Invoice> InvoiceModifiedUserNavigations { get; set; } = new List<Invoice>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<MeetingSetting> MeetingSettingCreatedUserNavigations { get; set; } = new List<MeetingSetting>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<MeetingSetting> MeetingSettingDeletedUserNavigations { get; set; } = new List<MeetingSetting>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<MeetingSetting> MeetingSettingModifiedUserNavigations { get; set; } = new List<MeetingSetting>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<MeetingSummary> MeetingSummaryCreatedUserNavigations { get; set; } = new List<MeetingSummary>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<MeetingSummary> MeetingSummaryDeletedUserNavigations { get; set; } = new List<MeetingSummary>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<MeetingSummary> MeetingSummaryModifiedUserNavigations { get; set; } = new List<MeetingSummary>();
 
     [ForeignKey("ModifiedUser")]
     [InverseProperty("InverseModifiedUserNavigation")]
@@ -148,4 +218,40 @@ public partial class User
     [ForeignKey("RoleId")]
     [InverseProperty("Users")]
     public virtual UserRole Role { get; set; } = null!;
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<UserAccount> UserAccountCreatedUserNavigations { get; set; } = new List<UserAccount>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<UserAccount> UserAccountDeletedUserNavigations { get; set; } = new List<UserAccount>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<UserAccount> UserAccountModifiedUserNavigations { get; set; } = new List<UserAccount>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<UserAccount> UserAccountUsers { get; set; } = new List<UserAccount>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<UserSession> UserSessionCreatedUserNavigations { get; set; } = new List<UserSession>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<UserSession> UserSessionDeletedUserNavigations { get; set; } = new List<UserSession>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<UserSession> UserSessionModifiedUserNavigations { get; set; } = new List<UserSession>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<UserSession> UserSessionUsers { get; set; } = new List<UserSession>();
+
+    [InverseProperty("CreatedUserNavigation")]
+    public virtual ICollection<UserSubscription> UserSubscriptionCreatedUserNavigations { get; set; } = new List<UserSubscription>();
+
+    [InverseProperty("DeletedUserNavigation")]
+    public virtual ICollection<UserSubscription> UserSubscriptionDeletedUserNavigations { get; set; } = new List<UserSubscription>();
+
+    [InverseProperty("ModifiedUserNavigation")]
+    public virtual ICollection<UserSubscription> UserSubscriptionModifiedUserNavigations { get; set; } = new List<UserSubscription>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<UserSubscription> UserSubscriptionUsers { get; set; } = new List<UserSubscription>();
 }
