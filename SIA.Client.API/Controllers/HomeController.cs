@@ -100,7 +100,7 @@ namespace SIA.Client.API.Controllers
             byte[] hashPassword = DataProtection.GetSaltHasPassword(Encoding.ASCII.GetBytes(signUpVM.User.HashPassword), saltBytes);
             signUpVM.User.HashPassword = DataProtection.EncryptWithIV(Convert.ToBase64String(hashPassword), AppConstants.ORG_AES_KEY_AND_IV);
             signUpVM.User.PasswordSalt = DataProtection.EncryptWithIV(Convert.ToBase64String(saltBytes), AppConstants.ORG_AES_KEY_AND_IV);
-            (UserVM? userVM, ResponseMessage responseMessage) = await userRepository.CreateSignUpAccountAsync(signUpVM.User, signUpVM.Organization);
+            (ResponseMessage responseMessage, UserVM? userVM) = await userRepository.CreateSignUpAccountAsync(signUpVM.User, signUpVM.Organization);
             if (responseMessage.IsSuccess && userVM != null)
             {
                 return Ok(userVM);
@@ -129,22 +129,44 @@ namespace SIA.Client.API.Controllers
                 DisplayName = userInfo.name,
                 ProfileImageUrl = userInfo.picture,
                 Email = userInfo.email,
-                IsEmailVerified = userInfo.email_verified
+                IsEmailVerified = userInfo.email_verified,
+                SecurityKey = Guid.NewGuid().ToString(),
+                SecretKey = DataProtection.EncryptWithIV(Guid.NewGuid().ToString(), AppConstants.ORG_AES_KEY_AND_IV)
             };
-            ResponseMessage responseMessage = await userRepository.CreateSocialMediaAccountAsync(userVM, new OrganizationVM());
-            if (responseMessage.IsSuccess)
-                return Ok(responseMessage);
+
+            OrganizationVM organizationVM = new()
+            {
+                OrganizationName = userInfo.name,
+                Email = userInfo.email,
+            };
+
+            (ResponseMessage responseMessage, SignInSuccessResponse? successResponse) = await userRepository.CreateSocialMediaAccountAsync(userVM, organizationVM);
+            if (successResponse != null && responseMessage.IsSuccess)
+            {
+                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
+                if (tokenResponse.IsSuccess)
+                {
+                    successResponse.SecretKey = DataProtection.DecryptWithIV(successResponse.SecretKey, AppConstants.ORG_AES_KEY_AND_IV);
+                    await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
+                    SetCookie(AppMessages.COOKIE_REFRESH_TOKEN, DataProtection.EncryptWithIV(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV), tokenResponse.RefreshToken.Expires);
+                    successResponse.AccessToken = tokenResponse.AccessToken;
+                    successResponse.RefreshKey = DataProtection.UrlEncode(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV);
+                    return Ok(successResponse);
+                }
+                else
+                    return BadRequest(tokenResponse.Message);
+            }
             else
                 return BadRequest(responseMessage.Message);
         }
 
-        [HttpPost]
-        [Route("org/create/{userId}/{userGuId}/{securityKey}")]
-        public async Task<IActionResult> CreateOrganization([FromRoute] string userId, [FromRoute] string userGuId, [FromRoute] string securityKey, [FromBody] OrganizationVM organizationVM)
-        {
-            ResponseMessage responseMessage = await userRepository.CreateOrganizationAsync(int.Parse(DataProtection.UrlDecode(userId, AppConstants.ORG_AES_KEY_AND_IV)), DataProtection.StringToGuid(userGuId), securityKey, organizationVM);
-            return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
-        }
+        //[HttpPost]
+        //[Route("org/create/{userId}/{userGuId}/{securityKey}")]
+        //public async Task<IActionResult> CreateOrganization([FromRoute] string userId, [FromRoute] string userGuId, [FromRoute] string securityKey, [FromBody] OrganizationVM organizationVM)
+        //{
+        //    ResponseMessage responseMessage = await userRepository.CreateOrganizationAsync(int.Parse(DataProtection.UrlDecode(userId, AppConstants.ORG_AES_KEY_AND_IV)), DataProtection.StringToGuid(userGuId), securityKey, organizationVM);
+        //    return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
+        //}
 
         [HttpPost]
         [Route("signin/email/authentication")]
@@ -168,6 +190,7 @@ namespace SIA.Client.API.Controllers
                     await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
                     SetCookie(AppMessages.COOKIE_REFRESH_TOKEN, DataProtection.EncryptWithIV(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV), tokenResponse.RefreshToken.Expires);
                     successResponse.AccessToken = tokenResponse.AccessToken;
+                    successResponse.RefreshKey = DataProtection.UrlEncode(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV);
                     return Ok(successResponse);
                 }
                 else
@@ -181,7 +204,12 @@ namespace SIA.Client.API.Controllers
         [Route("token/refresh/request")]
         public async Task<IActionResult> Refresh([FromBody] TokenRequest tokenRequest)
         {
-            tokenRequest.RefreshToken = DataProtection.DecryptWithIV(Request.Cookies[AppMessages.COOKIE_REFRESH_TOKEN] ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
+            tokenRequest.RefreshToken = DataProtection.UrlDecode(tokenRequest.RefreshToken ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
+            string refreshTokenCookie = DataProtection.DecryptWithIV(Request.Cookies[AppMessages.COOKIE_REFRESH_TOKEN] ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
+            
+            if(tokenRequest.RefreshToken != refreshTokenCookie)
+                return Unauthorized(AppMessages.UnauthorizedAccess);
+
             var principal = GetPrincipalFromExpiredToken(tokenRequest.AccessToken);
             if (principal == null) return BadRequest("Invalid access token");
             var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -194,10 +222,8 @@ namespace SIA.Client.API.Controllers
             TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenByClaimsAcync(principal.Claims);
 
             await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
-
-            SetCookie("refreshToken", tokenResponse.RefreshToken.Token, tokenResponse.RefreshToken.Expires);
-
-            return Ok(new {accessToken = tokenResponse.AccessToken, refreshToken = "" });
+            SetCookie(AppMessages.COOKIE_REFRESH_TOKEN, DataProtection.EncryptWithIV(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV), tokenResponse.RefreshToken.Expires);
+            return Ok(new {accessToken = tokenResponse.AccessToken, refreshKey = DataProtection.UrlEncode(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV) });
         }
     }
 }

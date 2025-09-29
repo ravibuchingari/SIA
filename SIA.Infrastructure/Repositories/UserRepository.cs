@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using SIA.Domain.Entities;
 using SIA.Domain.Models;
 using SIA.Infrastructure.Data;
@@ -16,6 +17,7 @@ namespace SIA.Infrastructure.Repositories
             if (organization != null)
                 return (null, AppMessages.DuplicateOrganizationEmail);
             organization = mapper.Map<Organization>(organizationVM);
+            organization.Email = organizationVM.Email;
             organization.SubscriptionId = (byte)SubscriptionPlans.Pro;
             organization.OrganizationStatusId = (byte)OrgStatus.EmailValidation;
             await dbContext.AddAsync(organization);
@@ -23,26 +25,26 @@ namespace SIA.Infrastructure.Repositories
             return (organization.OrganizationId, "Success");
         }
 
-        public async Task<(UserVM?, ResponseMessage)> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
+        public async Task<(ResponseMessage, UserVM?)> CreateSignUpAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
             User? user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Username == userVM.Username);
             if (user != null)
-                return (null, new ResponseMessage(false, AppMessages.DuplicateUsername));
+                return (new ResponseMessage(false, AppMessages.DuplicateUsername), null);
 
             user = await dbContext.Users.Include(org => org.Organization).FirstOrDefaultAsync(u => u.Email == userVM.Email);
             if (user != null)
-                return (null, new ResponseMessage(false, AppMessages.DuplicateEmail));
+                return (new ResponseMessage(false, AppMessages.DuplicateEmail), null);
 
-            using var transaction = await dbContext.Database.BeginTransactionAsync();
+            using IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync();
             try
             {
+                organizationVM.IsSignUpAccount = true;
                 (int? organizationId, string message) = await CreateOrganizationAsync(organizationVM!);
                 if (organizationId == null)
                 {
                     await transaction.RollbackAsync();
-                    return (null, new ResponseMessage(false, message));
+                    return (new ResponseMessage(false, message), null);
                 }
-
                
                 user = mapper.Map<User>(userVM);
                 user.OrganizationId = organizationId ?? 0;
@@ -58,61 +60,92 @@ namespace SIA.Infrastructure.Repositories
                     UserId = user.UserId,
                     UserGuid = user.UserGuid,
                     Email = user.Email,
-                    OrganizationVM = new OrganizationVM()
-                    {
-                        OrganizationGuid = user.Organization.OrganizationGuid,
-                        OrganizationId = user.OrganizationId,
-                        OrganizationName = user.Organization.OrganizationName,
-                        Email = user.Email
-                    },
                     Message = emailResponse.Message
                 };
                 await transaction.CommitAsync();
-                return (userVM, new ResponseMessage(true, AppMessages.AccountSuccess));
+                return (new ResponseMessage(true, AppMessages.AccountSuccess), userVM);
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return (null, new ResponseMessage(false, ex.Message));
+                return (new ResponseMessage(false, ex.InnerException != null ? ex.InnerException.Message : ex.Message), null);
             }
         }
 
-        public async Task<ResponseMessage> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM)
+        public async Task<(ResponseMessage, SignInSuccessResponse?)> CreateSocialMediaAccountAsync(UserVM userVM, OrganizationVM organizationVM)
         {
-            User? user = await dbContext.Users.Where(col => col.Email == userVM.Email).FirstOrDefaultAsync();
+            User? user = await dbContext.Users.Include(org => org.Organization).Include(rl => rl.Role).Where(col => col.Email == userVM.Email && col.SocialAuthId == userVM.SocialAuthId && col.IsSignUpUser == false).FirstOrDefaultAsync();
             if (user != null)
             {
                 user.ProfileImageUrl = userVM.ProfileImageUrl;
+                await SaveChangesAsync();
             }
             else
             {
-                (int? organiztionId, string message) = await CreateOrganizationAsync(organizationVM!);
-                if (organiztionId == null)
-                    return new ResponseMessage(false, message);
+                if(await dbContext.Users.Where(col => col.Email == userVM.Email).AnyAsync())
+                    return (new ResponseMessage(false, AppMessages.DuplicateOrganizationEmail), null);
 
-                userVM.OrganizationId = organiztionId ?? 0;
-                userVM.HashPassword = Guid.NewGuid().ToString();
-                userVM.PasswordSalt = Guid.NewGuid().ToString();
-                userVM.RoleId = 1;
-                userVM.IsActive = true;
-                user = mapper.Map<User>(userVM);
-                await dbContext.Users.AddAsync(user);
+                using IDbContextTransaction transaction = await dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    organizationVM.IsSignUpAccount = false;
+                    (int? organizationId, string message) = await CreateOrganizationAsync(organizationVM!);
+                    if (organizationId == null)
+                    {
+                        await transaction.RollbackAsync();
+                        return (new ResponseMessage(false, message), null);
+                    }
+
+                    userVM.OrganizationId = organizationId ?? 0;
+                    userVM.HashPassword = Guid.NewGuid().ToString();
+                    userVM.PasswordSalt = Guid.NewGuid().ToString();
+                    userVM.RoleId = 1;
+                    userVM.IsActive = true;
+                    user = mapper.Map<User>(userVM);
+                    await dbContext.Users.AddAsync(user);
+                    await SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    user = await dbContext.Users.Include(org => org.Organization).Include(rl => rl.Role).Where(col => col.Email == userVM.Email && col.SocialAuthId == userVM.SocialAuthId && col.IsSignUpUser == false).FirstOrDefaultAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return (new ResponseMessage(false, ex.InnerException != null ? ex.InnerException.Message : ex.Message), null);
+                }
             }
-            await SaveChangesAsync();
-            return new ResponseMessage(true, AppMessages.AccountSuccess);
+
+            if(user == null)
+                return (new ResponseMessage(false, AppMessages.SocialAuthFailed), null);
+
+            SignInSuccessResponse successResponse = new()
+            {
+                UserId = user.UserId,
+                UserGuid = user.UserGuid.ToString(),
+                DisplayName = user.FirstName,
+                SecurityKey = user.SecurityKey ?? string.Empty,
+                SecretKey = user.SecretKey ?? string.Empty,
+                OrganizationId = user.OrganizationId,
+                OrganizationGuid = user.Organization.OrganizationGuid.ToString(),
+                OrganizationName = user.Organization.OrganizationName,
+                RoleName = user.Role.RoleName,
+                IsSignUpAccount = false
+            };
+
+            return (new ResponseMessage(true, AppMessages.SUCCESS), successResponse);
         }
 
-        public async Task<ResponseMessage> CreateOrganizationAsync(int userId, Guid userGuId, string securityKey, OrganizationVM organizationVM)
-        {
-            User? user = await dbContext.Users.FirstOrDefaultAsync(col => col.UserId == userId && col.UserGuid == userGuId && col.SecurityKey == securityKey);
-            if (user != null)
-                return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
+        //private async Task<ResponseMessage> CreateOrganizationAsync(int userId, Guid userGuId, string securityKey, OrganizationVM organizationVM)
+        //{
+        //    User? user = await dbContext.Users.FirstOrDefaultAsync(col => col.UserId == userId && col.UserGuid == userGuId && col.SecurityKey == securityKey);
+        //    if (user != null)
+        //        return new ResponseMessage(false, AppMessages.UnauthorizedAccess);
 
-            (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
-            if (OrgId == null)
-                return new ResponseMessage(false, message);
-            return new ResponseMessage(true, AppMessages.AccountSuccess);
-        }
+        //    (int? OrgId, string message) = await CreateOrganizationAsync(organizationVM!);
+        //    if (OrgId == null)
+        //        return new ResponseMessage(false, message);
+        //    return new ResponseMessage(true, AppMessages.AccountSuccess);
+        //}
 
         public async Task<ResponseMessage> UpdateAccountTypeAsync(int userId, string securityKey, bool isOrganization)
         {
@@ -134,7 +167,7 @@ namespace SIA.Infrastructure.Repositories
 
         public async Task<(ResponseMessage, SignInSuccessResponse?)> SignInAsync(SignInRequest signInRequest)
         {
-            User? user = await dbContext.Users.Include(rl => rl.Role).Include(org => org.Organization).Where(col => col.Username == signInRequest.UserName && col.HashPassword == signInRequest.Password && col.IsDeleted == false && col.Organization.OrganizationStatusId != (byte)OrgStatus.Deleted).FirstOrDefaultAsync();
+            User? user = await dbContext.Users.Include(rl => rl.Role).Include(org => org.Organization).Where(col => col.Username == signInRequest.UserName && col.HashPassword == signInRequest.Password && col.IsSignUpUser == true && col.IsDeleted == false && col.Organization.OrganizationStatusId != (byte)OrgStatus.Deleted).FirstOrDefaultAsync();
             if (user == null)
                 return (new ResponseMessage(false, AppMessages.AuthenticationFailed), null);
 
@@ -161,7 +194,8 @@ namespace SIA.Infrastructure.Repositories
                 OrganizationId = user.OrganizationId,
                 OrganizationGuid = user.Organization.OrganizationGuid.ToString(),
                 OrganizationName = user.Organization.OrganizationName,
-                RoleName = user.Role.RoleName
+                RoleName = user.Role.RoleName,
+                IsSignUpAccount = true
             };
 
             return (new ResponseMessage(true, AppMessages.SUCCESS), successResponse);

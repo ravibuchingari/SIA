@@ -22,12 +22,12 @@ const GoogleAuthentication = () => {
     scope: 'openid profile email',
     onSuccess: async codeResponse => {
       try {
-        console.log(JSON.stringify(codeResponse))
-        await postAsync(CONTROLLER_HOME, "signin/google/validation", JSON.stringify(codeResponse)).then((response) => {
-          console.log('User info from backend:', response); 
+        //console.log(JSON.stringify(codeResponse))
+        await postAsync(CONTROLLER_HOME, "signin/google/authentication", JSON.stringify(codeResponse)).then((response) => {
+          toast.success(JSON.stringify(response));
         }).catch((error) => {
-            console.log(error);
-            toast.error("There was an error! " + (error.response?.data?.message || error.message))
+            //console.log(error.response.data);
+            toast.error("There was an error! " + (error.response?.data || error.message))
         });
       } catch (error) {
         toast.error(`Error sending code to backend: ${error}`);

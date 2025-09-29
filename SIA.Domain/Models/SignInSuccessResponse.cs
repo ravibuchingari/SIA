@@ -12,7 +12,8 @@
         public string SecretKey { get; set; }
         public string SecurityKey { get; set; }
         public string AccessToken { get; set; }
-        //public string RefreshToken { get; set; }
+        public string RefreshKey { get; set; }
         public string RoleName { get; set; }
+        public bool IsSignUpAccount { get; set; } = true;
     }
 }

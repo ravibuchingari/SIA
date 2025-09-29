@@ -14,9 +14,9 @@ namespace SIA.Infrastructure.Repositories
                 AuthConfigVM authConfigVM = new()
                 {
                     ClientId = providerSection["ClientId"],
-                    ClientSecretKey = providerSection["ClientSecretKey"]
+                    ClientSecretKey = providerSection["ClientSecretKey"],
+                    UserinfoApi = providerSection["UserinfoApi"],
                 };
-                authConfigVM.ClientSecretKey = providerSection["ClientSecretKey"];
                 return await Task.FromResult(authConfigVM);
             }
             else

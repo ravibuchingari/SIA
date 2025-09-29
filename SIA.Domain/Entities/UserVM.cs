@@ -35,6 +35,5 @@ namespace SIA.Domain.Entities
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public long? ModifiedUser { get; set; }
         public DateTime? ModifiedDate { get; set; } = DateTime.Now;
-        public OrganizationVM? OrganizationVM { get; set; }
     }
 }

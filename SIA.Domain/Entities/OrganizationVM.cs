@@ -8,7 +8,7 @@
         public int OrganizationSize { get; set; }
         public string? ContactPerson { get; set; }
         public string? PhoneNumber { get; set; }
-        public string? Email { get; set; }
+        public string Email { get; set; } = null!;
         public long? CreatedUser { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public long? ModifiedUser { get; set; }
@@ -19,6 +19,7 @@
         public bool IsBusiness { get; set; }
         public bool IsEmailVerified { get; set; }
         public byte OrganizationStatusId { get; set; }
+        public bool IsSignUpAccount { get; set; }
         public DateTime EmailVerificationTokenTime { get; set; } = DateTime.Now.AddDays(-1);
     }
 }

@@ -63,6 +63,8 @@ public partial class Organization
 
     public byte OrganizationStatusId { get; set; }
 
+    public bool IsSignUpAccount { get; set; }
+
     [ForeignKey("DeletedUser")]
     [InverseProperty("OrganizationDeletedUserNavigations")]
     public virtual User? DeletedUserNavigation { get; set; }

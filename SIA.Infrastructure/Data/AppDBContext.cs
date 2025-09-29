@@ -261,6 +261,7 @@ public partial class AppDBContext : DbContext
             entity.HasKey(e => e.OrganizationId).HasName("PK__Organiza__CADB0B1291236B75");
 
             entity.Property(e => e.EmailVerificationTokenTime).HasDefaultValueSql("(getdate())");
+            entity.Property(e => e.IsSignUpAccount).HasDefaultValue(true);
             entity.Property(e => e.OrganizationGuid).HasDefaultValueSql("(newid())");
             entity.Property(e => e.OrganizationSize).HasDefaultValue(1);
 

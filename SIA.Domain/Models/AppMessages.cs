@@ -23,6 +23,6 @@
         public const string AuthenticationFailed = "Authentication failed.";
         public const string UserSuspended = "Your account has been suspended. Please contact the administrator";
         public const string AccountSuspended = "Your account has been suspended. Please contact the administrator";
-
+        public const string SocialAuthFailed = "Authentication with your provider failed. Please contact the service provider for more information";
     }
 }
