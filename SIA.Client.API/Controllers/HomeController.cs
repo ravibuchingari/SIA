@@ -171,6 +171,8 @@ namespace SIA.Client.API.Controllers
 
         [HttpPost]
         [Route("signin/email/authentication")]
+        [ProducesResponseType(typeof(SignInSuccessResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest signInRequest)
         {
             signInRequest.SecurityKey = Guid.NewGuid().ToString();
@@ -201,9 +203,12 @@ namespace SIA.Client.API.Controllers
                 return BadRequest(responseMessage.Message);
         }
 
+
         [HttpPost()]
         [Route("token/refresh/request")]
-        public async Task<IActionResult> Refresh([FromBody] TokenRequest tokenRequest)
+        [ProducesResponseType(typeof(AuthenticationToken), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> Refresh([FromBody] AuthenticationToken tokenRequest)
         {
             tokenRequest.RefreshToken = DataProtection.UrlDecode(tokenRequest.RefreshToken ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
             string refreshTokenCookie = DataProtection.DecryptWithIV(Request.Cookies[AppMessages.COOKIE_REFRESH_TOKEN] ?? string.Empty, AppConstants.ORG_AES_KEY_AND_IV);
@@ -224,7 +229,13 @@ namespace SIA.Client.API.Controllers
 
             await userRepository.UpdateRefreshTokenAsync(tokenResponse.RefreshToken);
             SetCookie(AppMessages.COOKIE_REFRESH_TOKEN, DataProtection.EncryptWithIV(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV), tokenResponse.RefreshToken.Expires);
-            return Ok(new {accessToken = tokenResponse.AccessToken, refreshKey = DataProtection.UrlEncode(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV) });
+
+            AuthenticationToken authenticationToken = new()
+            {
+                AccessToken = tokenResponse.AccessToken,
+                RefreshToken = DataProtection.UrlEncode(tokenResponse.RefreshToken.Token, AppConstants.ORG_AES_KEY_AND_IV)
+            };
+            return Ok(authenticationToken);
         }
     }
 }
