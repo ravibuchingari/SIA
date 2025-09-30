@@ -103,6 +103,7 @@ namespace SIA.Client.API.Controllers
             (ResponseMessage responseMessage, UserVM? userVM) = await userRepository.CreateSignUpAccountAsync(signUpVM.User, signUpVM.Organization);
             if (responseMessage.IsSuccess && userVM != null)
             {
+                //send email verification link
                 return Ok(userVM);
             }
             else
@@ -143,7 +144,7 @@ namespace SIA.Client.API.Controllers
             (ResponseMessage responseMessage, SignInSuccessResponse? successResponse) = await userRepository.CreateSocialMediaAccountAsync(userVM, organizationVM);
             if (successResponse != null && responseMessage.IsSuccess)
             {
-                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
+                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.Email, successResponse.RoleName, successResponse.SecurityKey);
                 if (tokenResponse.IsSuccess)
                 {
                     successResponse.SecretKey = DataProtection.DecryptWithIV(successResponse.SecretKey, AppConstants.ORG_AES_KEY_AND_IV);
@@ -183,7 +184,7 @@ namespace SIA.Client.API.Controllers
             (ResponseMessage responseMessage, SignInSuccessResponse? successResponse) = await userRepository.SignInAsync(signInRequest);
             if (responseMessage.IsSuccess && successResponse != null)
             {
-                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.RoleName, successResponse.SecurityKey);
+                TokenResponse tokenResponse = await jwtTokenHandler.GenerateTokenAsync(successResponse.UserId.ToString(), successResponse.UserGuid.ToString(), successResponse.Email, successResponse.RoleName, successResponse.SecurityKey);
                 if (tokenResponse.IsSuccess)
                 {
                     successResponse.SecretKey = DataProtection.DecryptWithIV(successResponse.SecretKey, AppConstants.ORG_AES_KEY_AND_IV);

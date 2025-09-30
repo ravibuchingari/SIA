@@ -5,7 +5,7 @@ namespace SIA.Authentication
 {
     public interface IJwtTokenHandler
     {
-        Task<TokenResponse> GenerateTokenAsync(string userId, string userGuId, string role, string securityKey);
+        Task<TokenResponse> GenerateTokenAsync(string userId, string userGuId, string email, string role, string securityKey);
         Task<TokenResponse> GenerateTokenByClaimsAcync(IEnumerable<Claim> claims);
         string GetJwtSecurityKey();
     }

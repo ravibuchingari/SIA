@@ -9,6 +9,6 @@ namespace SIA.Domain.Models
     public class TokenRequest
     {
         public string AccessToken { get; set; } = null!;
-        public string? RefreshToken { get; set; }
+        public string? RefreshToken { get; set; } // or refresh kek
     }
 }

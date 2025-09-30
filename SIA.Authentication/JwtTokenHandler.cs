@@ -37,7 +37,7 @@ namespace SIA.Authentication
             return Convert.ToBase64String(randomBytes);
         }
 
-        public async Task<TokenResponse> GenerateTokenAsync(string userId, string userGuId, string role, string securityKey)
+        public async Task<TokenResponse> GenerateTokenAsync(string userId, string userGuId, string email, string role, string securityKey)
         {
             if (string.IsNullOrEmpty(userId) ||
                 string.IsNullOrEmpty(userGuId) ||
@@ -62,6 +62,7 @@ namespace SIA.Authentication
                 new(ClaimTypes.NameIdentifier, userId),
                 new(ClaimTypes.Name, userId),
                 new(ClaimTypes.Role, role),
+                new(ClaimTypes.Email, email),
                 new("GuId", userGuId),
                 new("SecurityKey", securityKey),
                 new("Origin", jwtTokenParameter.Origin)
