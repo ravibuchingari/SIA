@@ -22,7 +22,11 @@ const useAuth = () => {
         window.location.href = '/login';
     }
 
-    return { isAuthenticated, loading, logout };
+    const authenticate = (value) => {
+        setIsAuthenticated(value);
+    }
+
+    return { isAuthenticated, loading, logout, authenticate};
 };
 
 export default useAuth;

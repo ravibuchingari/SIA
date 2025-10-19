@@ -13,7 +13,9 @@ import CheckAuth from './components/checkAuth';
 import LoadingSpinner from './components/LoadingSpinner';
 import { getAsync } from './services/apiService';
 import { CONTROLLER_HOME } from './services/constants';
-import AuthenticationSuccess from './components/social/microsoft/AuthenticationSuccess';
+import GoolgeCallback from './components/social/google/GooglCallback';
+import MicrosoftCallback from './components/social/microsoft/MicrosoftCallback';
+import CalendarIntegration from './components/user/calendarAccounts/calendarIntegration';
 
 
 function App() {
@@ -29,8 +31,10 @@ function App() {
             <Route path='/' element={<SignIn />} />
             <Route path='/signin' element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path='/microsoft/auth/success' element={<AuthenticationSuccess />} />
-            <Route path='/user/dashboard' element={<CheckAuth><UserDashboard /></CheckAuth>} />
+            <Route path="/google/calendar/integration" element={<CalendarIntegration></CalendarIntegration>} />
+            <Route path="/google/callback" element={<GoolgeCallback></GoolgeCallback>} />
+            <Route path="/microsoft/callback" element={<MicrosoftCallback></MicrosoftCallback>} />
+            <Route path='/user/dashboard' element={<UserDashboard></UserDashboard>} />
             <Route path='/admin/dashboard' element={<CheckAuth><AdminDashboard /></CheckAuth>} />
           </Routes>
           <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" /> 

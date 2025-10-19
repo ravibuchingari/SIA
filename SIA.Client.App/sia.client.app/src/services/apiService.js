@@ -12,9 +12,10 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("accessToken");  
+        console.log("Request made with token:", token);
         if (token)
             config.headers["Authorization"] = `Bearer ${token}`;
-        config.headers["Content-Type"] = "application/json";
+        //config.headers["Content-Type"] = "application/json";
         return config;
     },
     (error) => {
@@ -53,11 +54,22 @@ export const refreshAccessToken = async () => {
 }
 
 export const getAsync = async (controllerName, actionName, query = "") => { 
-    return api.get(`/${controllerName}/${actionName}${query ? `?${query}` : ''}`);
+    return api.get(`/${controllerName}/${actionName}${query ? `?${query}` : ''}`, {
+        headers: { "Content-Type": "application/json" }
+    });
 }
 
 export const postAsync = async (controllerName, actionName, jsonString) => { 
-    return api.post(`/${controllerName}/${actionName}`, jsonString);
+    return api.post(`/${controllerName}/${actionName}`, jsonString, {
+        headers: { "Content-Type": "application/json" }
+    });
 }
+
+export const postDataAsync = async (controllerName, actionName, formData) => { 
+    return api.post(`/${controllerName}/${actionName}`, formData, {
+        headers: formData.getHeaders?.() || { "Content-Type": "multipart/form-data" }
+    });
+}
+
 
 export default api;

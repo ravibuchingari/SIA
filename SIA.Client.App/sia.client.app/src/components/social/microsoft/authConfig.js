@@ -2,9 +2,9 @@ import { LogLevel } from "@azure/msal-browser";
 
 export const msalConfig = {
   auth: {
-    clientId: "YOUR_CLIENT_ID",
+    clientId: "6a069d24-8316-434b-bb5f-d53db6816204",
     authority: "https://login.microsoftonline.com/common", // Supports Hotmail
-    redirectUri: "http://localhost:55556/microsoft/auth/success",
+    redirectUri: "http://localhost:5556/microsoft/callback",
     postLogoutRedirectUri:'/',
     navigateToLoginRequestUrl:false,
   },

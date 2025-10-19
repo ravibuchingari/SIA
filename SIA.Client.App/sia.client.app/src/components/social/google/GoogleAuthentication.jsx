@@ -1,13 +1,18 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
 import googleLogo from "../../../assets/google.svg";
 import { toast } from 'react-toastify';
 import { postAsync } from '../../../services/apiService';
 import { CONTROLLER_HOME } from '../../../services/constants';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const GoogleAuthentication = () => {
-
-    const socialMediaIcon = {
+  const navigate = useNavigate();
+  //const [clientId, setClientId] = useState(null);
+  //const [clientId, setClientId] = useState("");
+  const socialMediaIcon = {
         padding: "8px",
         border: "solid 1px #ddd",
         borderRadius: "10px",
@@ -18,28 +23,40 @@ const GoogleAuthentication = () => {
         margin: "4px",
     };
 
-  const handleLogin = useGoogleLogin({
-    scope: 'openid profile email',
-    onSuccess: async codeResponse => {
+    const executeLogin = async () => {
       try {
-        //console.log(JSON.stringify(codeResponse))
-        await postAsync(CONTROLLER_HOME, "signin/google/authentication", JSON.stringify(codeResponse)).then((response) => {
-          toast.success(JSON.stringify(response));
-        }).catch((error) => {
-            //console.log(error.response.data);
-            toast.error("There was an error! " + (error.response?.data || error.message))
-        });
-      } catch (error) {
-        toast.error(`Error sending code to backend: ${error}`);
-      }
-    },
-    onError: error => {
-      toast.error(`Google login failed: ${error}`);
-    },
-  });
+            await postAsync(CONTROLLER_HOME, "google/client","").then((response) => {
+              //setClientId(response.data.message);
+              //console.log("Fetched Google Client ID:", response.data.message);
+              handleLogin(response.data.clientId, response.data.redirectUri);
+            }).catch((error) => {
+              toast.error(error.response?.data || error.message);
+            });
+        } catch (error) {
+            toast.error(`Google login failed: ${error}`);
+        }
+    }
+
+  const handleLogin = (clientId, redirectUri) => {
+    if(!clientId || clientId.trim() === ""){
+        toast.error("Google Client ID is not set.");
+        return;
+    }
+
+    const scope = 'openid profile email https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events'; // https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${clientId}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&response_type=code` +
+      `&scope=${encodeURIComponent(scope)}` +
+      `&access_type=offline` +
+      `&prompt=consent`;
+sessionStorage.setItem("is_calendar_auth", false)
+    window.location.href = authUrl;
+  };
 
   return (
-      <div style={{userSelect: 'none', textAlign: 'center'}} onClick={() => handleLogin()}>
+      <div style={{userSelect: 'none', textAlign: 'center'}} onClick={() => executeLogin()}>
           <div>
               <img
                   src={googleLogo}

@@ -161,14 +161,6 @@ namespace SIA.Client.API.Controllers
                 return BadRequest(responseMessage.Message);
         }
 
-        //[HttpPost]
-        //[Route("org/create/{userId}/{userGuId}/{securityKey}")]
-        //public async Task<IActionResult> CreateOrganization([FromRoute] string userId, [FromRoute] string userGuId, [FromRoute] string securityKey, [FromBody] OrganizationVM organizationVM)
-        //{
-        //    ResponseMessage responseMessage = await userRepository.CreateOrganizationAsync(int.Parse(DataProtection.UrlDecode(userId, AppConstants.ORG_AES_KEY_AND_IV)), DataProtection.StringToGuid(userGuId), securityKey, organizationVM);
-        //    return responseMessage.IsSuccess ? Ok(responseMessage) : BadRequest(responseMessage.Message);
-        //}
-
         [HttpPost]
         [Route("signin/email/authentication")]
         [ProducesResponseType(typeof(SignInSuccessResponse), StatusCodes.Status200OK)]
@@ -202,7 +194,6 @@ namespace SIA.Client.API.Controllers
             else
                 return BadRequest(responseMessage.Message);
         }
-
 
         [HttpPost()]
         [Route("token/refresh/request")]
